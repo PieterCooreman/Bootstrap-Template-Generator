@@ -272,6 +272,18 @@ const CARD_TEXTS = [
 const CARD_BADGES = ['Popular','New','Pro','Hot','Beta','Featured','Top Pick','Best Value'];
 const HERO_LAYOUTS = ['full-bg-glass','split','centered','magazine','gradient-banner'];
 
+// Background video MP4s per industry (Mixkit free stock, direct CDN, verified 200)
+const BG_VIDEOS = {
+  analytics: ['https://assets.mixkit.co/videos/4727/4727-720.mp4','https://assets.mixkit.co/videos/4394/4394-720.mp4','https://assets.mixkit.co/videos/4741/4741-720.mp4'],
+  finance:   ['https://assets.mixkit.co/videos/4735/4735-720.mp4','https://assets.mixkit.co/videos/4394/4394-720.mp4','https://assets.mixkit.co/videos/4486/4486-720.mp4'],
+  health:    ['https://assets.mixkit.co/videos/3802/3802-720.mp4','https://assets.mixkit.co/videos/1935/1935-720.mp4','https://assets.mixkit.co/videos/34487/34487-720.mp4'],
+  design:    ['https://assets.mixkit.co/videos/4741/4741-720.mp4','https://assets.mixkit.co/videos/4727/4727-720.mp4','https://assets.mixkit.co/videos/34563/34563-720.mp4'],
+  cloud:     ['https://assets.mixkit.co/videos/4394/4394-720.mp4','https://assets.mixkit.co/videos/4735/4735-720.mp4','https://assets.mixkit.co/videos/4486/4486-720.mp4'],
+  travel:    ['https://assets.mixkit.co/videos/3079/3079-720.mp4','https://assets.mixkit.co/videos/1166/1166-720.mp4','https://assets.mixkit.co/videos/34405/34405-720.mp4'],
+  education: ['https://assets.mixkit.co/videos/3971/3971-720.mp4','https://assets.mixkit.co/videos/12749/12749-720.mp4','https://assets.mixkit.co/videos/50330/50330-720.mp4'],
+  food:      ['https://assets.mixkit.co/videos/21786/21786-720.mp4','https://assets.mixkit.co/videos/43603/43603-720.mp4','https://assets.mixkit.co/videos/24041/24041-720.mp4'],
+};
+
 const HERO_STATS = [
   [{v:'10k+',l:'Customers'},{v:'99.9%',l:'Uptime'},{v:'4.9★',l:'Rating'}],
   [{v:'50k+',l:'Users'},{v:'<50ms',l:'Latency'},{v:'4.8★',l:'App Store'}],
@@ -400,8 +412,11 @@ function generate() {
   btn.disabled = true; ico.classList.add('spin');
   setTimeout(() => {
     const pal   = rnd(P), font = rnd(F), brand = rnd(BR);
-    const hl    = rnd(HERO_LAYOUTS), ns = rnd(NAV_STYLES), bv = rnd(BTN_VARIANTS), cv = rnd(CARD_VARS), grid = rnd(GRIDS);
+    let   hl    = rnd(HERO_LAYOUTS), ns = rnd(NAV_STYLES), bv = rnd(BTN_VARIANTS), cv = rnd(CARD_VARS), grid = rnd(GRIDS);
     const hi    = rnd(HI[brand.tp]), ci = shuf(CI[brand.tp]), ti = shuf(TE).slice(0,3), av = shuf(AV);
+    // 20% chance of video background hero
+    const bgVid = rnd(BG_VIDEOS[brand.tp]);
+    if (Math.random() < 0.2) hl = 'video-bg';
     const dark  = forceMode ? forceMode==='dark' : pal.d;
     const ico2  = shuf(ICONS);
     const fdescs = rnd(FEATURE_DESCS);
@@ -434,7 +449,7 @@ function generate() {
     const showCta = Math.random() < 0.65;
     const showAnnounce = Math.random() < 0.5;
     const announce = rnd(ANNOUNCEMENTS);
-    html = buildSite({pal,font,brand,hl,ns,bv,cv,grid,hi,ci,ti,av,dark,ico2,fdescs,secSub,solSub,ctexts,badges,hstats,fstat,fhead,chead,thead,flayout,tlayout,logoNames,logoHead,pricingTiers,pricingHead,pricingSub,faqItems,faqHead,showLogos,showPricing,showFaq,showTesti,showStats,showCta,ctaHead,ctaSub,showAnnounce,announce});
+    html = buildSite({pal,font,brand,hl,ns,bv,cv,grid,hi,ci,ti,av,dark,ico2,fdescs,secSub,solSub,ctexts,badges,hstats,fstat,fhead,chead,thead,flayout,tlayout,logoNames,logoHead,pricingTiers,pricingHead,pricingSub,faqItems,faqHead,showLogos,showPricing,showFaq,showTesti,showStats,showCta,ctaHead,ctaSub,showAnnounce,announce,bgVid});
     const frm = document.getElementById('frame');
     frm.classList.remove('loaded');
     frm.src = URL.createObjectURL(new Blob([html],{type:'text/html'}));
@@ -454,7 +469,7 @@ function dl() {
 }
 
 // ── SITE BUILDER ─────────────────────────────────────────────────────────────
-function buildSite({pal,font,brand,hl,ns,bv,cv,grid,hi,ci,ti,av,dark,ico2,fdescs,secSub,solSub,ctexts,badges,hstats,fstat,fhead,chead,thead,flayout,tlayout,logoNames,logoHead,pricingTiers,pricingHead,pricingSub,faqItems,faqHead,showLogos,showPricing,showFaq,showTesti,showStats,showCta,ctaHead,ctaSub,showAnnounce,announce}) {
+function buildSite({pal,font,brand,hl,ns,bv,cv,grid,hi,ci,ti,av,dark,ico2,fdescs,secSub,solSub,ctexts,badges,hstats,fstat,fhead,chead,thead,flayout,tlayout,logoNames,logoHead,pricingTiers,pricingHead,pricingSub,faqItems,faqHead,showLogos,showPricing,showFaq,showTesti,showStats,showCta,ctaHead,ctaSub,showAnnounce,announce,bgVid}) {
   const bc = (v='primary',sz='') => {
     const s = sz?`btn-${sz}`:'';
     if(bv==='rounded-pill')  return `btn btn-${v} rounded-pill ${s}`.trim();
@@ -545,7 +560,7 @@ ${announceHTML}
 </section>`,
 
     'split': `
-<section id="top" style="min-height:92vh;background:var(--bg);display:flex;align-items:center;">
+<section id="top" style="min-height:92vh;background:var(--bg);display:flex;align-items:center;overflow:hidden;">
   <div class="container py-5">
     <div class="row align-items-center g-5">
       <div class="col-lg-6" data-aos="fade-right">
@@ -596,7 +611,7 @@ ${announceHTML}
 </section>`,
 
     'magazine': `
-<section id="top" style="min-height:92vh;">
+<section id="top" style="min-height:92vh;overflow:hidden;">
   <div class="row g-0" style="min-height:92vh;">
     <div class="col-lg-5 d-flex flex-column justify-content-center" style="background:${pal.p};color:#fff;padding:4rem 3rem;" data-aos="fade-right">
       <p style="opacity:.6;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5rem;">— ${brand.n}</p>
@@ -638,6 +653,30 @@ ${announceHTML}
     </div>
   </div>
 </section>`,
+
+    'video-bg': `
+<section id="top" class="video-hero">
+  <div class="video-hero-bg">
+    <video autoplay muted loop playsinline preload="auto" src="${bgVid}"></video>
+  </div>
+  <div class="video-hero-overlay"></div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <div class="glass-pill mb-4"><i class="bi bi-play-circle me-1"></i> ${brand.n}</div>
+        <h1 class="display-3 fw-bold mb-4" style="color:#fff;font-family:${font.h};text-shadow:0 2px 40px rgba(0,0,0,.5);">${brand.tl}</h1>
+        <p class="lead mb-5" style="color:rgba(255,255,255,.88);max-width:560px;margin:0 auto 2.5rem;text-shadow:0 1px 8px rgba(0,0,0,.3);">${brand.d}</p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+          <a href="#features" class="${bc('primary','lg')}">${brand.cta}</a>
+          <a href="#cards" class="btn btn-outline-light btn-lg">${brand.cta2}</a>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5 g-3 justify-content-center" data-aos="fade-up" data-aos-delay="160">
+      ${hstats.map(s=>`<div class="col-auto"><div class="glass-stat"><div class="fw-bold fs-4" style="color:#fff;">${s.v}</div><small style="opacity:.68;">${s.l}</small></div></div>`).join('')}
+    </div>
+  </div>
+</section>`,
   };
 
   const cards = [
@@ -658,7 +697,7 @@ ${announceHTML}
 
   const css = `
 <style>
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:clip}
 ::selection{ background:${pal.p}35; color:${pal.p}; }
 [id]{ scroll-margin-top:80px; }
 
@@ -937,6 +976,7 @@ p,li,small,span{ transition:color .3s; }
   h1{ font-size:2rem!important; }
   h2{ font-size:1.6rem!important; }
   .pricing-card{ padding:1.5rem; }
+  .video-hero{ min-height:80vh; }
 }
 
 /* ══ NOISE TEXTURE ══ */
@@ -1023,6 +1063,25 @@ body::after{
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
 }
 @keyframes marquee{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ══ VIDEO HERO ══ */
+.video-hero{
+  position:relative; min-height:100vh; display:flex; align-items:center; overflow:hidden;
+  background:${pal.dk} url('${hi}') center/cover no-repeat;
+}
+.video-hero-bg{
+  position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.video-hero-bg video{
+  position:absolute; top:50%; left:50%;
+  min-width:100%; min-height:100%; width:auto; height:auto;
+  transform:translate(-50%,-50%); object-fit:cover;
+}
+.video-hero-overlay{
+  position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.4) 50%,rgba(0,0,0,.65) 100%);
+}
+.video-hero .container{ position:relative; z-index:2; }
 
 /* ══ ANNOUNCEMENT BAR ══ */
 .announce-bar{
