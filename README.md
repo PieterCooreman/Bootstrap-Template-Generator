@@ -4,6 +4,8 @@ A single-file Bootstrap 5 website template generator that produces complete, ran
 
 Download or use on https://pietercooreman.github.io/Bootstrap-Template-Generator/
 
+Next step: Upload any generated template to any AI and ask to replace/add/remove texts and images. 
+
 ---
 
 ## Quick Start
