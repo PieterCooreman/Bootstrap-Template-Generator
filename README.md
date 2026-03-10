@@ -2,7 +2,7 @@
 
 A single-file Bootstrap 5 website template generator that produces complete, randomized SaaS landing pages with **129 million+ unique visual combinations**. Every click generates a fully functional, responsive, dark-mode-ready website you can download as a standalone HTML file -- including video background heroes, privacy/terms modals, cookie consent, and scroll animations.
 
-Download or use on https://pietercooreman.github.io/Bootstrap-Template-Generator/
+Download or use on https://pietercooreman.github.io/Bootstrap-Design-Generator/
 
 Next: Upload any generated template to any AI-chatbot and ask to replace/add/remove texts and images. 
 
