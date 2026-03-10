@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bootstrap Design Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0b0b12; --surface: #14141e; --border: #25253a;
+  --accent: #7c3aed; --accent2: #06b6d4; --text: #eeeeff; --muted: #6366f1aa;
+}
+html, body { height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; display: flex; }
+
+/* ── SLIM SIDEBAR ── */
+.sidebar {
+  width: 68px; min-width: 68px; height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between; padding: 1.1rem 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface); z-index: 10;
+}
+.sidebar-logo {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--accent), #06b6d4);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: .9rem; color: #fff; letter-spacing: -.05em; flex-shrink: 0;
+}
+.sidebar-mid { display: flex; flex-direction: column; align-items: center; gap: .65rem; }
+.sidebar-bottom { display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+
+.s-btn {
+  position: relative; width: 44px; height: 44px; border-radius: 11px;
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .25s cubic-bezier(0.34,1.56,0.64,1); font-size: 1.05rem;
+}
+.s-btn.generate {
+  background: linear-gradient(135deg, var(--accent), #5b21b6);
+  color: #fff; box-shadow: 0 0 16px rgba(124,58,237,.5);
+}
+.s-btn.generate:hover { transform: scale(1.13); box-shadow: 0 0 26px rgba(124,58,237,.8); }
+.s-btn.generate:active { transform: scale(.93); }
+.s-btn.download {
+  background: rgba(6,182,212,.1); color: var(--accent2); border: 1px solid rgba(6,182,212,.25);
+}
+.s-btn.download:hover { background: rgba(6,182,212,.2); transform: scale(1.1); border-color: var(--accent2); }
+.s-btn.download:disabled { opacity: .28; cursor: not-allowed; transform: none; }
+.s-btn.mode {
+  background: rgba(255,255,255,.05); color: var(--text); border: 1px solid var(--border); font-size: .9rem;
+}
+.s-btn.mode:hover { background: rgba(255,255,255,.1); transform: scale(1.08); }
+.s-btn::after {
+  content: attr(data-tip); position: absolute; left: calc(100% + 9px); top: 50%; transform: translateY(-50%);
+  background: #1c1c2e; color: var(--text); font-family: 'Space Mono', monospace; font-size: .62rem;
+  padding: .28rem .6rem; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity .15s; border: 1px solid var(--border); z-index: 99;
+}
+.s-btn:hover::after { opacity: 1; }
+.s-count { font-family:'Space Mono',monospace; font-size:.52rem; color:var(--muted); text-align:center; line-height:1.4; }
+.s-count span { color:var(--accent2); display:block; font-size:.85rem; font-weight:700; }
+
+.spin { animation: spin .65s linear infinite; display:inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RIGHT PANEL ── */
+.right-panel { flex:1; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+.frame-chrome {
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: .5rem .9rem; display: flex; align-items: center; gap: .45rem; flex-shrink: 0;
+}
+.dot { width:10px; height:10px; border-radius:50%; }
+.dot-r{background:#ff5f57;} .dot-y{background:#febc2e;} .dot-g{background:#28c840;}
+.frame-url {
+  flex:1; background:var(--surface); border:1px solid var(--border); border-radius:5px;
+  padding:.2rem .6rem; font-family:'Space Mono',monospace; font-size:.61rem; color:var(--muted);
+  margin-left:.35rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+}
+.preview-area { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; }
+.empty-state {
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:1rem; color:var(--muted); font-family:'Space Mono',monospace;
+  font-size:.7rem; letter-spacing:.07em; opacity:.4; background:var(--surface);
+  transition:opacity .35s, visibility .35s; pointer-events:none;
+}
+.empty-state::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(rgba(124,58,237,.05) 1px,transparent 1px), linear-gradient(90deg,rgba(124,58,237,.05) 1px,transparent 1px);
+  background-size:36px 36px;
+}
+.empty-state.gone { opacity:0; visibility:hidden; }
+iframe { flex:1; width:100%; border:none; background:#fff; display:block; opacity:0; transition:opacity .45s ease; }
+iframe.loaded { opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Bs</div>
+  <div class="sidebar-mid">
+    <button class="s-btn generate" id="genBtn" onclick="generate()" data-tip="Suggest Design">
+      <svg id="genIco" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
+    </button>
+    <button class="s-btn download" id="dlBtn" onclick="dl()" data-tip="Download Template" disabled>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </button>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="s-btn mode" id="modeBtn" onclick="toggleMode()" data-tip="Dark / Light mode">
+      <svg id="modeIco" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <div class="s-count"><span id="cnt">0</span>made</div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="frame-chrome">
+    <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+    <div class="frame-url" id="fUrl">Click ✦ to generate a Bootstrap website</div>
+  </div>
+  <div class="preview-area">
+    <div class="empty-state" id="empty">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Your generated Bootstrap design will appear here
+    </div>
+    <iframe id="frame" title="Preview" onload="this.classList.add('loaded')"></iframe>
+  </div>
+</div>
+
+<script>
+let html = '', count = 0, forceMode = null; // null=auto, 'dark', 'light'
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const P = [
+  {n:'Ocean Depth',  p:'#0f4c81',s:'#00b4d8',a:'#90e0ef',bg:'#f0f8ff',dk:'#03045e',tx:'#1a1a2e',lt:'#caf0f8',d:false},
+  {n:'Ember',        p:'#c1440e',s:'#f4a261',a:'#e76f51',bg:'#fff8f0',dk:'#370617',tx:'#2d1b0e',lt:'#fde8d8',d:false},
+  {n:'Forest',       p:'#2d6a4f',s:'#52b788',a:'#95d5b2',bg:'#f0faf4',dk:'#081c15',tx:'#1a2e22',lt:'#d8f3dc',d:false},
+  {n:'Midnight',     p:'#818cf8',s:'#a78bfa',a:'#c4b5fd',bg:'#0f0f1a',dk:'#06060f',tx:'#e0e0ff',lt:'#1e1b4b',d:true },
+  {n:'Rose Gold',    p:'#9d4e5e',s:'#e8a0b0',a:'#f7c5d0',bg:'#fff5f7',dk:'#4a1428',tx:'#2d0f1c',lt:'#fde8ed',d:false},
+  {n:'Slate Modern', p:'#334155',s:'#64748b',a:'#38bdf8',bg:'#f8fafc',dk:'#0f172a',tx:'#1e293b',lt:'#e2e8f0',d:false},
+  {n:'Citrus',       p:'#b45309',s:'#fbbf24',a:'#fde68a',bg:'#fffbeb',dk:'#451a03',tx:'#292524',lt:'#fef3c7',d:false},
+  {n:'Neon Dusk',    p:'#0d9488',s:'#2dd4bf',a:'#99f6e4',bg:'#f0fdfa',dk:'#042f2e',tx:'#134e4a',lt:'#ccfbf1',d:false},
+  {n:'Deep Space',   p:'#6366f1',s:'#8b5cf6',a:'#a78bfa',bg:'#0d0d1a',dk:'#050510',tx:'#e0e7ff',lt:'#1e1b4b',d:true },
+  {n:'Nordic',       p:'#1e3a5f',s:'#5b8db8',a:'#a8d5f5',bg:'#f0f6ff',dk:'#0a1628',tx:'#1a2840',lt:'#dbeafe',d:false},
+];
+
+const F = [
+  {h:"'Inter',sans-serif",              b:"'Inter',sans-serif",              gf:'Inter:wght@400;500;600;700;800'},
+  {h:"'DM Serif Display',serif",        b:"'DM Sans',sans-serif",            gf:'DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;700'},
+  {h:"'Plus Jakarta Sans',sans-serif",   b:"'Plus Jakarta Sans',sans-serif", gf:'Plus+Jakarta+Sans:wght@400;500;600;700;800'},
+  {h:"'Outfit',sans-serif",             b:"'Outfit',sans-serif",             gf:'Outfit:wght@300;400;500;600;700;800'},
+  {h:"'Space Grotesk',sans-serif",      b:"'IBM Plex Sans',sans-serif",      gf:'Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600'},
+  {h:"'Fraunces',serif",                b:"'Commissioner',sans-serif",        gf:'Fraunces:opsz,wght@9..144,400;9..144,700;9..144,800&family=Commissioner:wght@400;500;600'},
+  {h:"'Sora',sans-serif",               b:"'Sora',sans-serif",               gf:'Sora:wght@300;400;500;600;700;800'},
+  {h:"'Bricolage Grotesque',sans-serif", b:"'Source Sans 3',sans-serif",      gf:'Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Source+Sans+3:wght@400;500;600'},
+  {h:"'Playfair Display',serif",         b:"'Lato',sans-serif",               gf:'Playfair+Display:wght@400;700;800&family=Lato:wght@400;700'},
+  {h:"'Manrope',sans-serif",             b:"'Manrope',sans-serif",            gf:'Manrope:wght@300;400;500;600;700;800'},
+];
+
+const BR = [
+  {n:'Luminos Analytics',tl:'Turn Data Into Decisions',       d:'Enterprise analytics for modern teams. Visualize, explore, and act on your data in real time with AI-powered dashboards.',            cta:'Start Free Trial',    cta2:'View Demo',           f1:'Real-time dashboards',    f2:'AI-powered insights',    f3:'One-click integrations', ft:'Request a Demo',   tp:'analytics'},
+  {n:'Pulse Metrics',    tl:'Data That Drives Growth',        d:'Unlock the full potential of your business data. Pulse turns complex numbers into clear, actionable strategies your whole team gets.',  cta:'Try for Free',        cta2:'See It Live',         f1:'Custom report builder',   f2:'Anomaly detection',      f3:'Slack & Teams alerts',   ft:'Book a Demo',      tp:'analytics'},
+  {n:'Verda Finance',    tl:'Smart Money, Simple Life',       d:'Personal finance and investment platform designed for the next generation of wealth builders. Automate, grow, and protect your money.', cta:'Open Account',        cta2:'Learn More',          f1:'Zero-fee trading',        f2:'Automated savings',      f3:'Smart tax tools',        ft:'Get Early Access', tp:'finance'},
+  {n:'Apex Capital',     tl:'Invest With Confidence',         d:'Institutional-grade investment tools, now available to everyone. Build a diversified portfolio with one tap and sleep well at night.',  cta:'Start Investing',     cta2:'View Plans',          f1:'Fractional shares',       f2:'Portfolio rebalancing',  f3:'Dividend reinvestment',  ft:'Open Account',     tp:'finance'},
+  {n:'Helio Health',     tl:'Your Wellness, Elevated',        d:'Holistic health tracking and telehealth. Connect with certified practitioners from anywhere and take control of your wellbeing.',       cta:'Book Consultation',   cta2:'Explore Plans',       f1:'Expert practitioners',    f2:'Daily health scores',    f3:'Personalized plans',     ft:'Schedule a Call',  tp:'health'},
+  {n:'Vitara Care',      tl:'Feel Better, Every Day',         d:'Combining wearable data, nutrition science, and expert coaching into one beautifully simple wellness platform built for real life.',    cta:'Get Started',         cta2:'Watch Demo',          f1:'Wearable sync',           f2:'Nutrition coaching',     f3:'Sleep analytics',        ft:'Join Waitlist',    tp:'health'},
+  {n:'Orbis Studio',     tl:'Design Without Limits',          d:'Collaborative design platform for agencies and product teams. Ship pixel-perfect interfaces faster than ever before.',                 cta:'Start Designing',     cta2:'See Examples',        f1:'Real-time collaboration', f2:'300+ UI components',     f3:'Dev handoff tools',      ft:'Join Beta',        tp:'design'},
+  {n:'Kova Creative',    tl:'Build Beautiful, Ship Fast',     d:'The all-in-one creative suite for modern product teams. Prototype, iterate, and handoff — all without switching tabs.',                cta:'Start for Free',      cta2:'Explore Features',    f1:'Vector & UI tools',       f2:'Interactive prototypes', f3:'Version history',        ft:'Request Access',   tp:'design'},
+  {n:'Zephyr Cloud',     tl:'Infrastructure at Scale',        d:'Modern cloud infrastructure for startups and enterprises. Deploy globally in minutes. Scale without limits, pay only for what you use.',cta:'Deploy Now',          cta2:'Read Docs',           f1:'99.99% uptime SLA',       f2:'Auto-scaling',           f3:'Global CDN',             ft:'Contact Sales',    tp:'cloud'},
+  {n:'Stratos Hosting',  tl:'Your App, Everywhere',           d:'Edge-optimized hosting with zero-config deployments. Push your code and we handle the rest — from SSL to serverless functions.',       cta:'Deploy Free',         cta2:'See Pricing',         f1:'Edge deployment',         f2:'Serverless functions',   f3:'Instant rollbacks',      ft:'Start Building',   tp:'cloud'},
+  {n:'Marea Travels',    tl:'Journey Without Borders',        d:'Curated travel experiences and intelligent itinerary planning for the modern explorer. Discover places most tourists never find.',      cta:'Plan My Trip',        cta2:'Explore Destinations',f1:'Local expert guides',     f2:'Flexible booking',       f3:'Travel insurance',       ft:'Get a Quote',      tp:'travel'},
+  {n:'Nomad Routes',     tl:'The World Is Your Office',       d:'Built for digital nomads and remote workers. Find co-working spaces, visa info, and curated city guides — all in one place.',          cta:'Start Exploring',     cta2:'Browse Cities',       f1:'Co-working finder',       f2:'Visa requirements',      f3:'Cost-of-living index',   ft:'Join Community',   tp:'travel'},
+  {n:'Sylva Academy',    tl:'Learn What Matters',             d:'Professional development with expert-led courses, live certifications, and 1-on-1 mentoring from practitioners in your field.',        cta:'Enroll Free',         cta2:'Browse Courses',      f1:'2000+ courses',           f2:'Live mentorship',        f3:'Industry certs',         ft:'Enroll Today',     tp:'education'},
+  {n:'MindBridge',       tl:'Knowledge That Sticks',          d:'Adaptive learning technology that personalizes every lesson to the way your brain works. Study smarter, retain more, achieve faster.',  cta:'Try for Free',        cta2:'How It Works',        f1:'Adaptive quizzes',        f2:'Spaced repetition',      f3:'Progress analytics',     ft:'Start Learning',   tp:'education'},
+  {n:'Novu Foods',       tl:'Taste the Future',               d:'Sustainable, science-backed nutrition delivered to your door. Every meal is crafted by Michelin-trained chefs and dietitians.',        cta:'Order Now',           cta2:'View Menu',           f1:'Chef-crafted meals',      f2:'Macro tracking',         f3:'Eco packaging',          ft:'Get 20% Off',      tp:'food'},
+  {n:'Harvest Kitchen',  tl:'Farm to Fork, Simplified',       d:'Connecting local farmers with conscious eaters. Get seasonal ingredient boxes with recipe cards delivered fresh each week.',           cta:'Get My Box',          cta2:'See This Week',       f1:'Seasonal ingredients',    f2:'Recipe card included',   f3:'Zero food waste',        ft:'Subscribe & Save',tp:'food'},
+];
+
+const HI = {
+  analytics:['https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&q=85','https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600&q=85','https://images.unsplash.com/photo-1666875753105-c63a6f3bdc86?w=1600&q=85','https://images.unsplash.com/photo-1599658880436-c61792e70672?w=1600&q=85'],
+  finance:  ['https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&q=85','https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?w=1600&q=85','https://images.unsplash.com/photo-1638913662584-731da41f5a59?w=1600&q=85','https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1600&q=85'],
+  health:   ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1600&q=85','https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1600&q=85','https://images.unsplash.com/photo-1540420773420-3366772f4999?w=1600&q=85','https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1600&q=85'],
+  design:   ['https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1600&q=85','https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=85','https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=1600&q=85','https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=1600&q=85'],
+  cloud:    ['https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1600&q=85','https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=85','https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&q=85','https://images.unsplash.com/photo-1573164713988-8665fc963095?w=1600&q=85'],
+  travel:   ['https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&q=85','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=85','https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1600&q=85','https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=1600&q=85'],
+  education:['https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=1600&q=85','https://images.unsplash.com/photo-1529636798458-92182e662485?w=1600&q=85','https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1600&q=85','https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1600&q=85'],
+  food:     ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1600&q=85','https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&q=85','https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=85','https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1600&q=85'],
+};
+const CI = {
+  analytics:['https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&q=80','https://images.unsplash.com/photo-1543286386-713bdd548da4?w=800&q=80','https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80','https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&q=80','https://images.unsplash.com/photo-1666875753105-c63a6f3bdc86?w=800&q=80','https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80'],
+  finance:  ['https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800&q=80','https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=80','https://images.unsplash.com/photo-1634733988138-bf2c3a2a13fa?w=800&q=80','https://images.unsplash.com/photo-1638913662584-731da41f5a59?w=800&q=80','https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80','https://images.unsplash.com/photo-1579621970795-87facc2f976d?w=800&q=80'],
+  health:   ['https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80','https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=800&q=80','https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80','https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80','https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80','https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&q=80'],
+  design:   ['https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800&q=80','https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&q=80','https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800&q=80','https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80','https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=800&q=80','https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80'],
+  cloud:    ['https://images.unsplash.com/photo-1597733336794-12d05021d510?w=800&q=80','https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80','https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80','https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80','https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80','https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80'],
+  travel:   ['https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80','https://images.unsplash.com/photo-1502791451862-7bd8c1df43a7?w=800&q=80','https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80','https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800&q=80','https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80'],
+  education:['https://images.unsplash.com/photo-1581726707445-75cbe4efc586?w=800&q=80','https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80','https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80','https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80','https://images.unsplash.com/photo-1529636798458-92182e662485?w=800&q=80','https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80'],
+  food:     ['https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80','https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80','https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80','https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&q=80','https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80','https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80'],
+};
+const AV = [
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=80',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&q=80',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&q=80',
+  'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=120&q=80',
+  'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=120&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=80',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&q=80',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&q=80',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&q=80',
+  'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&q=80',
+];
+const TE = [
+  {q:'Completely transformed how our team works. We saw clear ROI within the first month.',         nm:'Sarah Chen',      ro:'Head of Product, Stripe'},
+  {q:'The best tool we\'ve invested in this year. The support team is genuinely world-class.',      nm:'Marcus Okafor',   ro:'CTO, Notion Labs'},
+  {q:'Exactly what we needed — clean, fast, and it just works right out of the box.',              nm:'Elena Vasquez',   ro:'Founder, Linear'},
+  {q:"Our entire workflow is built around this now. Can't imagine ever going back.",                nm:'David Park',      ro:'VP Engineering, Vercel'},
+  {q:'Onboarding took less than 10 minutes. The results were immediate and measurable.',           nm:'Amara Diallo',    ro:'Director of Ops, Figma'},
+  {q:'Five stars without hesitation. The team ships fast and actually listens to feedback.',        nm:'Tom Ridley',      ro:'Product Manager, Shopify'},
+  {q:'We evaluated six competitors. This was the only one that actually delivered on its promise.', nm:'Priya Nair',      ro:'Engineering Lead, Atlassian'},
+  {q:'Saved us roughly 12 hours a week across the team. The ROI was obvious after day one.',       nm:'James Oduya',     ro:'Operations Director, HubSpot'},
+  {q:'The interface is beautiful and the performance is rock solid. Rare combination.',            nm:'Chloe Beaumont',  ro:'Lead Designer, Intercom'},
+  {q:'We went from prototype to production in a weekend. Genuinely impressive platform.',          nm:'Rui Tanaka',      ro:'Startup Founder, YC W24'},
+  {q:'Our customers noticed the difference immediately. That\'s all the validation we needed.',    nm:'Fatima Al-Rashid',ro:'CEO, Seedcamp Portfolio'},
+  {q:'Handles our scale without breaking a sweat. We\'ve had zero downtime in six months.',        nm:'Leo Martínez',    ro:'Infrastructure Lead, Cloudflare'},
+];
+
+const FEATURE_DESCS = [
+  ['Streamline your workflow with intelligent automation that saves hours every week.', 'Get insights that matter with our AI-powered analytics and recommendation engine.', 'Connect your entire stack in minutes with 200+ native integrations.'],
+  ['Cut manual work in half with smart workflows that run in the background for you.', 'Surface the metrics that move the needle — filtered, visualized, and always fresh.', 'Plug into your existing tools without writing a single line of code.'],
+  ['Go from idea to impact faster with templates built by industry experts.', 'Make confident decisions backed by real-time data, not gut feelings.', 'Scale without limits — our infrastructure grows as fast as you do.'],
+  ['Automate repetitive tasks and let your team focus on what actually matters.', 'Beautiful dashboards that tell the story behind your numbers instantly.', 'Enterprise-grade security baked in from day one, not bolted on later.'],
+  ['Your team stays in sync with shared workspaces, comments, and live updates.', 'Spot trends before they become problems with proactive alerts and forecasts.', 'One-click onboarding gets your whole team productive in under an hour.'],
+  ['Reduce busywork with AI that handles scheduling, tagging, and follow-ups.', 'Understand your customers deeply with behavioral analytics and cohort analysis.', 'Open API and webhooks give your developers full flexibility to extend anything.'],
+];
+
+const SEC_SUBTITLES = [
+  'Everything you need, nothing you don\'t. Built for teams that move fast.',
+  'The tools your team has been waiting for. Simple to start, powerful to scale.',
+  'Trusted by thousands of companies who outgrew their old solutions.',
+  'Designed with real workflows in mind — not theoretical ones.',
+  'Stop duct-taping tools together. Everything in one place, finally.',
+  'Built for the way modern teams actually work.',
+  'Less friction, more focus. That\'s the whole idea.',
+  'From solo founders to Fortune 500 — one platform for every stage.',
+];
+
+const SOLUTIONS_SUBTITLES = [
+  'Choose the tools that fit your workflow.',
+  'Pick your starting point — everything connects seamlessly.',
+  'Solutions designed around real problems, not imaginary ones.',
+  'Start with one module. Add more as you grow.',
+  'Everything works together out of the box.',
+  'Built to fit your stack, your team, and your pace.',
+];
+
+const CARD_TEXTS = [
+  ['Get started in minutes. Our intuitive setup wizard guides you through every step.', 'Harness the full power of your data with beautiful, real-time visualizations.', 'Enterprise-grade security and compliance baked in from day one.'],
+  ['Set up in an afternoon — no engineers, no consultants, no headaches.', 'Turn raw numbers into clear stories your whole team can act on immediately.', 'SOC 2 certified with end-to-end encryption and granular access controls.'],
+  ['Launch your first workflow before lunch on day one.', 'Interactive charts and reports that update the moment your data changes.', 'Audit logs, SSO, and role-based permissions that scale with your org.'],
+  ['Onboard your team in minutes, not months, with guided templates.', 'Customizable dashboards built for executives, analysts, and operators alike.', 'Built for regulated industries — GDPR, HIPAA, and SOC 2 ready out of the box.'],
+  ['Our drag-and-drop builder means zero code required for any workflow.', 'From vanity metrics to north-star KPIs — track what actually moves the needle.', 'Your data never leaves your region. Compliance you can rely on.'],
+];
+
+const CARD_BADGES = ['Popular','New','Pro','Hot','Beta','Featured','Top Pick','Best Value'];
+const HERO_LAYOUTS = ['full-bg-glass','split','centered','magazine','gradient-banner'];
+
+const HERO_STATS = [
+  [{v:'10k+',l:'Customers'},{v:'99.9%',l:'Uptime'},{v:'4.9★',l:'Rating'}],
+  [{v:'50k+',l:'Users'},{v:'<50ms',l:'Latency'},{v:'4.8★',l:'App Store'}],
+  [{v:'$2B+',l:'Processed'},{v:'128+',l:'Countries'},{v:'4.9★',l:'Trustpilot'}],
+  [{v:'3M+',l:'Tasks done'},{v:'99.99%',l:'SLA'},{v:'#1',l:'Product Hunt'}],
+  [{v:'200+',l:'Integrations'},{v:'24/7',l:'Support'},{v:'4.7★',l:'G2 Crowd'}],
+  [{v:'15min',l:'Avg. setup'},{v:'40%',l:'Time saved'},{v:'98%',l:'Retention'}],
+];
+
+const FLOAT_STATS = [
+  {ico:'bi-graph-up-arrow', val:'+128%', label:'Growth this quarter'},
+  {ico:'bi-lightning-charge-fill', val:'3.2×', label:'Faster than before'},
+  {ico:'bi-people-fill', val:'12,400', label:'Active users today'},
+  {ico:'bi-trophy-fill', val:'#1 rated', label:'On Product Hunt'},
+  {ico:'bi-shield-check', val:'99.99%', label:'Uptime last 90 days'},
+  {ico:'bi-stars', val:'4.9 / 5', label:'Average user rating'},
+  {ico:'bi-clock-fill', val:'–11 hrs', label:'Saved per team / week'},
+  {ico:'bi-currency-dollar', val:'$420K', label:'Revenue unlocked'},
+];
+
+const SECTION_HEADINGS = {
+  features: ['Why ${brand.n}?','What Makes Us Different','Built Different, By Design','The ${brand.n} Advantage','What\'s Inside','Why Teams Choose Us'],
+  cards:    ['Explore Our Solutions','What You Can Build','Everything You Need','Powerful Features','See What\'s Possible','Core Capabilities'],
+  testi:    ['What Our Customers Say','Don\'t Take Our Word For It','Loved by Teams Everywhere','Real Results, Real People','Trusted Worldwide','Hear From Our Community'],
+};
+
+// Logo bar brands for social proof strip
+const LOGO_BRANDS = [
+  ['Stripe','Vercel','Notion','Linear','Figma','Shopify'],
+  ['Slack','Airbnb','Spotify','Dropbox','Asana','HubSpot'],
+  ['GitHub','Atlassian','Intercom','Twilio','Datadog','Segment'],
+];
+const LOGO_HEADERS = [
+  'Trusted by teams at the world\'s best companies',
+  'Powering growth at leading organizations',
+  'Join thousands of companies already onboard',
+  'Used and loved by teams worldwide',
+];
+
+// Pricing data
+const PRICING_TIERS = [
+  [
+    {name:'Starter',price:'Free',period:'forever',features:['Up to 3 users','1 GB storage','Basic analytics','Email support','Community access'],cta:'Get Started',pop:false},
+    {name:'Pro',price:'$29',period:'/month',features:['Unlimited users','50 GB storage','Advanced analytics','Priority support','API access','Custom integrations'],cta:'Start Free Trial',pop:true},
+    {name:'Enterprise',price:'$99',period:'/month',features:['Unlimited everything','500 GB storage','Custom analytics','Dedicated support','SSO & SAML','SLA guarantee','Custom onboarding'],cta:'Contact Sales',pop:false},
+  ],
+  [
+    {name:'Basic',price:'$9',period:'/month',features:['5 team members','10 projects','Basic reporting','Email support'],cta:'Start Free',pop:false},
+    {name:'Growth',price:'$49',period:'/month',features:['25 team members','Unlimited projects','Advanced reporting','Priority support','Custom workflows','Integrations'],cta:'Start Free Trial',pop:true},
+    {name:'Scale',price:'$149',period:'/month',features:['Unlimited members','Unlimited projects','Enterprise reporting','24/7 phone support','Advanced security','Dedicated CSM','Custom SLA'],cta:'Talk to Sales',pop:false},
+  ],
+];
+const PRICING_HEADINGS = ['Simple, Transparent Pricing','Plans That Scale With You','Choose Your Plan','Pricing Built for Every Stage'];
+const PRICING_SUBS = [
+  'No hidden fees. No surprises. Cancel anytime.',
+  'Start free, upgrade when you\'re ready.',
+  'Every plan includes a 14-day free trial.',
+  'Pay only for what you need. Scale as you grow.',
+];
+
+// FAQ data
+const FAQ_ITEMS = [
+  [
+    {q:'How do I get started?', a:'Sign up for a free account and you\'ll be guided through our quick setup wizard. Most teams are up and running in under 15 minutes.'},
+    {q:'Can I change plans later?', a:'Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect immediately and billing is prorated.'},
+    {q:'Is my data secure?', a:'Yes. We use end-to-end encryption, are SOC 2 Type II certified, and comply with GDPR. Your data is stored in ISO 27001-certified data centers.'},
+    {q:'Do you offer a free trial?', a:'Every paid plan comes with a 14-day free trial — no credit card required. You get full access to all features during the trial period.'},
+    {q:'What kind of support do you offer?', a:'Free plans include community support and docs. Paid plans include priority email support, and Enterprise plans include a dedicated customer success manager.'},
+  ],
+  [
+    {q:'What integrations do you support?', a:'We integrate with 200+ tools including Slack, Jira, GitHub, Salesforce, HubSpot, and more. Our open API lets you build custom integrations too.'},
+    {q:'Can I import my existing data?', a:'Yes. We support CSV, Excel, and direct imports from most major platforms. Our migration team can help with large-scale data transfers.'},
+    {q:'Is there a long-term contract?', a:'No. All plans are month-to-month with no long-term commitment. Annual plans are available at a discount if you prefer.'},
+    {q:'How does billing work?', a:'We bill monthly or annually depending on your preference. Annual billing saves you 20%. All major credit cards and invoicing are supported.'},
+    {q:'Do you offer discounts for startups?', a:'Yes! We have a startup program offering 50% off for the first year. Apply through our website with proof of funding stage.'},
+  ],
+];
+const FAQ_HEADINGS = ['Frequently Asked Questions','Got Questions? We Have Answers','Common Questions','Everything You Need to Know'];
+
+// Feature layout variants
+const FEATURE_LAYOUTS = ['three-col','alt-rows','four-col'];
+const TESTI_LAYOUTS = ['three-col','featured','single-large'];
+const CTA_HEADINGS = [
+  'Ready to Get Started?','Take the Next Step','Join Thousands of Happy Teams',
+  'Start Building Today','See the Difference for Yourself','Your Team Deserves Better Tools',
+];
+const CTA_SUBS = [
+  'Start your free trial today — no credit card required.',
+  'Get up and running in minutes. Cancel anytime.',
+  'Join the teams that are already ahead of the curve.',
+  'The only tool your team will ever need.',
+];
+
+const NAV_STYLES   = ['dark','colored','glass-dark','glass-light','minimal-light'];
+const BTN_VARIANTS = ['rounded-pill','square','rounded-2','outline-first','mixed'];
+const CARD_VARS    = ['shadow-hover','glass-card','flat-border','gradient-tint','image-top'];
+const GRIDS        = [['col-md-4','col-md-4','col-md-4'],['col-md-6','col-md-6'],['col-md-4','col-md-8'],['col-lg-3','col-lg-3','col-lg-6']];
+const ICONS        = ['bi-lightning-charge-fill','bi-shield-check','bi-graph-up-arrow','bi-cpu','bi-people-fill','bi-rocket-takeoff-fill','bi-stars','bi-gem','bi-trophy-fill'];
+
+const rnd  = a => a[Math.floor(Math.random()*a.length)];
+const shuf = a => [...a].sort(()=>Math.random()-.5);
+
+// ── MODE TOGGLE ───────────────────────────────────────────────────────────────
+function toggleMode() {
+  forceMode = forceMode === null ? 'dark' : forceMode === 'dark' ? 'light' : null;
+  const ico = document.getElementById('modeIco');
+  ico.innerHTML = (forceMode==='light')
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  document.getElementById('modeBtn').setAttribute('data-tip',
+    forceMode==='dark'?'Force Light Mode':forceMode==='light'?'Auto Mode':'Dark / Light Mode');
+  if (html) generate();
+}
+
+// ── GENERATE ─────────────────────────────────────────────────────────────────
+function generate() {
+  const btn = document.getElementById('genBtn'), ico = document.getElementById('genIco');
+  btn.disabled = true; ico.classList.add('spin');
+  setTimeout(() => {
+    const pal   = rnd(P), font = rnd(F), brand = rnd(BR);
+    const hl    = rnd(HERO_LAYOUTS), ns = rnd(NAV_STYLES), bv = rnd(BTN_VARIANTS), cv = rnd(CARD_VARS), grid = rnd(GRIDS);
+    const hi    = rnd(HI[brand.tp]), ci = shuf(CI[brand.tp]), ti = shuf(TE).slice(0,3), av = shuf(AV);
+    const dark  = forceMode ? forceMode==='dark' : pal.d;
+    const ico2  = shuf(ICONS);
+    const fdescs = rnd(FEATURE_DESCS);
+    const secSub = rnd(SEC_SUBTITLES);
+    const solSub = rnd(SOLUTIONS_SUBTITLES);
+    const ctexts = rnd(CARD_TEXTS);
+    const badges = shuf(CARD_BADGES);
+    const hstats = rnd(HERO_STATS);
+    const fstat  = rnd(FLOAT_STATS);
+    const fhead  = rnd(SECTION_HEADINGS.features).replace('${brand.n}', brand.n);
+    const chead  = rnd(SECTION_HEADINGS.cards);
+    const thead  = rnd(SECTION_HEADINGS.testi);
+    const flayout = rnd(FEATURE_LAYOUTS);
+    const tlayout = rnd(TESTI_LAYOUTS);
+    const logoNames = rnd(LOGO_BRANDS);
+    const logoHead = rnd(LOGO_HEADERS);
+    const pricingTiers = rnd(PRICING_TIERS);
+    const pricingHead = rnd(PRICING_HEADINGS);
+    const pricingSub = rnd(PRICING_SUBS);
+    const faqItems = rnd(FAQ_ITEMS);
+    const faqHead = rnd(FAQ_HEADINGS);
+    const ctaHead = rnd(CTA_HEADINGS);
+    const ctaSub = rnd(CTA_SUBS);
+    // Randomize section inclusion
+    const showLogos = Math.random() < 0.75;
+    const showPricing = Math.random() < 0.6;
+    const showFaq = Math.random() < 0.55;
+    const showTesti = Math.random() < 0.8;
+    const showStats = Math.random() < 0.7;
+    const showCta = Math.random() < 0.65;
+    html = buildSite({pal,font,brand,hl,ns,bv,cv,grid,hi,ci,ti,av,dark,ico2,fdescs,secSub,solSub,ctexts,badges,hstats,fstat,fhead,chead,thead,flayout,tlayout,logoNames,logoHead,pricingTiers,pricingHead,pricingSub,faqItems,faqHead,showLogos,showPricing,showFaq,showTesti,showStats,showCta,ctaHead,ctaSub});
+    const frm = document.getElementById('frame');
+    frm.classList.remove('loaded');
+    frm.src = URL.createObjectURL(new Blob([html],{type:'text/html'}));
+    document.getElementById('empty').classList.add('gone');
+    document.getElementById('fUrl').textContent = `${brand.n.toLowerCase().replace(/\s+/g,'')} · ${pal.n} · ${hl} · ${dark?'dark':'light'}`;
+    document.getElementById('dlBtn').disabled = false;
+    document.getElementById('cnt').textContent = ++count;
+    ico.classList.remove('spin'); btn.disabled = false;
+  }, 220);
+}
+
+function dl() {
+  if (!html) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download = 'bootstrap-template.html'; a.click();
+}
+
+// ── SITE BUILDER ─────────────────────────────────────────────────────────────
+function buildSite({pal,font,brand,hl,ns,bv,cv,grid,hi,ci,ti,av,dark,ico2,fdescs,secSub,solSub,ctexts,badges,hstats,fstat,fhead,chead,thead,flayout,tlayout,logoNames,logoHead,pricingTiers,pricingHead,pricingSub,faqItems,faqHead,showLogos,showPricing,showFaq,showTesti,showStats,showCta,ctaHead,ctaSub}) {
+  const bc = (v='primary',sz='') => {
+    const s = sz?`btn-${sz}`:'';
+    if(bv==='rounded-pill')  return `btn btn-${v} rounded-pill ${s}`.trim();
+    if(bv==='square')        return `btn btn-${v} rounded-0 ${s}`.trim();
+    if(bv==='outline-first') return v==='primary'?`btn btn-outline-${v} ${s}`.trim():`btn btn-${v} ${s}`.trim();
+    if(bv==='mixed')         return v==='primary'?`btn btn-${v} rounded-pill ${s}`.trim():`btn btn-outline-${v} rounded-pill ${s}`.trim();
+    return `btn btn-${v} rounded-2 ${s}`.trim();
+  };
+  const cc = () => ({
+    'shadow-hover':'card border-0 h-100 c-hover',
+    'glass-card'  :'card h-100 c-glass',
+    'flat-border' :'card h-100',
+    'gradient-tint':'card h-100 border-0 c-grad',
+    'image-top'   :'card border-0 h-100 overflow-hidden c-hover',
+  }[cv]||'card h-100 border-0 shadow');
+
+  // Nav
+  const navBg = {
+    'dark'         :'navbar-dark bg-dark',
+    'colored'      :'navbar-dark',
+    'glass-dark'   :'navbar-dark',
+    'glass-light'  :'navbar-light',
+    'minimal-light':'navbar-light bg-white shadow-sm',
+  }[ns]||'navbar-dark bg-dark';
+  const navSt = {
+    'colored'   :`style="background:${pal.p}!important"`,
+    'glass-dark':`style="background:rgba(8,8,18,.55)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.07)"`,
+    'glass-light':`style="background:rgba(255,255,255,.55)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,0,0,.07)"`,
+  }[ns]||'';
+
+  const nav = `
+<nav class="navbar navbar-expand-lg ${navBg} sticky-top" ${navSt}>
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="#top" style="font-family:${font.h};letter-spacing:-.01em;">${brand.n}</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto gap-1">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#cards">Solutions</a></li>
+        ${showPricing?'<li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>':''}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">More</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-graph-up me-2 text-primary"></i>${brand.f1}</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-shield-check me-2 text-primary"></i>${brand.f2}</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-rocket-takeoff me-2 text-primary"></i>${brand.f3}</a></li>
+          </ul>
+        </li>
+      </ul>
+      <div class="d-flex gap-2">
+        <a href="#" class="${bc('outline-primary','sm')}">Log In</a>
+        <a href="#" class="${bc('primary','sm')}">${brand.cta}</a>
+      </div>
+    </div>
+  </div>
+</nav>`;
+
+  // Heroes
+  const heroes = {
+    'full-bg-glass': `
+<section id="top" style="min-height:100vh;background:url('${hi}') center/cover no-repeat fixed;display:flex;align-items:center;position:relative;">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.52)"></div>
+  <div class="container position-relative" style="z-index:2">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
+        <div class="glass-pill mb-4">✦&nbsp; ${brand.n}</div>
+        <h1 class="display-3 fw-bold mb-4" style="color:#fff;font-family:${font.h};text-shadow:0 2px 30px rgba(0,0,0,.4);">${brand.tl}</h1>
+        <p class="lead mb-5" style="color:rgba(255,255,255,.85);max-width:560px;margin:0 auto 2.5rem;">${brand.d}</p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+          <a href="#features" class="${bc('primary','lg')}">${brand.cta}</a>
+          <a href="#cards" class="btn btn-outline-light btn-lg">${brand.cta2}</a>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5 g-3 justify-content-center" data-aos="fade-up" data-aos-delay="160">
+      ${hstats.map(s=>`<div class="col-auto"><div class="glass-stat"><div class="fw-bold fs-4" style="color:#fff;">${s.v}</div><small style="opacity:.68;">${s.l}</small></div></div>`).join('')}
+    </div>
+  </div>
+</section>`,
+
+    'split': `
+<section id="top" style="min-height:92vh;background:var(--bg);display:flex;align-items:center;">
+  <div class="container py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6" data-aos="fade-right">
+        <span class="hero-badge-soft">${brand.n}</span>
+        <h1 class="tx-head" style="font-family:${font.h};font-size:clamp(2.2rem,4.5vw,3.6rem);font-weight:800;line-height:1.1;">${brand.tl}</h1>
+        <p class="tx-muted my-4" style="font-size:1.08rem;line-height:1.72;">${brand.d}</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="#features" class="${bc('primary','lg')}">${brand.cta} <i class="bi bi-arrow-right ms-1"></i></a>
+          <a href="#cards" class="${bc('secondary','lg')}">${brand.cta2}</a>
+        </div>
+        <div class="mt-5 d-flex gap-4">
+          ${hstats.map((s,i)=>`<div style="border-left:3px solid ${[pal.p,pal.s,pal.a][i]};padding-left:.7rem;"><div class="fw-bold fs-5" style="color:${[pal.p,pal.s,pal.a][i]};">${s.v}</div><small class="tx-muted">${s.l}</small></div>`).join('')}
+        </div>
+      </div>
+      <div class="col-lg-6" data-aos="fade-left">
+        <div style="position:relative;">
+          <img src="${hi}" class="img-fluid rounded-4 shadow-lg lb-img" data-full="${hi}" alt="Hero" style="width:100%;height:460px;object-fit:cover;cursor:zoom-in;transition:transform .4s;" onmouseenter="this.style.transform='scale(1.02)'" onmouseleave="this.style.transform=''">
+          <div class="glass-float-card" data-aos="zoom-in" data-aos-delay="320">
+            <i class="bi ${fstat.ico}" style="color:${pal.p};font-size:1.3rem;"></i>
+            <div><strong>${fstat.val}</strong><br><small class="tx-muted">${fstat.label}</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>`,
+
+    'centered': `
+<section id="top" style="min-height:88vh;background:var(--bg);display:flex;align-items:center;text-align:center;">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8" data-aos="fade-up">
+        <span class="hero-badge-soft">Trusted by ${hstats[0].v} ${hstats[0].l}</span>
+        <h1 class="gradient-text" style="font-family:${font.h};font-size:clamp(2.5rem,5vw,4rem);font-weight:800;line-height:1.08;margin-bottom:1.25rem;">${brand.tl}</h1>
+        <p class="tx-muted" style="font-size:1.12rem;max-width:540px;margin:0 auto 2.5rem;line-height:1.72;">${brand.d}</p>
+        <div class="d-flex justify-content-center flex-wrap gap-3 mb-5">
+          <a href="#features" class="${bc('primary','lg')}">${brand.cta}</a>
+          <a href="#cards" class="${bc('outline-primary','lg')}">${brand.cta2}</a>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
+      <div class="col-lg-10">
+        <img src="${hi}" class="img-fluid rounded-4 shadow-lg lb-img" data-full="${hi}" alt="" style="max-height:420px;width:100%;object-fit:cover;cursor:zoom-in;">
+      </div>
+    </div>
+  </div>
+</section>`,
+
+    'magazine': `
+<section id="top" style="min-height:92vh;">
+  <div class="row g-0" style="min-height:92vh;">
+    <div class="col-lg-5 d-flex flex-column justify-content-center" style="background:${pal.p};color:#fff;padding:4rem 3rem;" data-aos="fade-right">
+      <p style="opacity:.6;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5rem;">— ${brand.n}</p>
+      <h1 style="font-family:${font.h};font-size:clamp(2rem,3.5vw,3rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;">${brand.tl}</h1>
+      <p style="opacity:.86;line-height:1.76;margin-bottom:2rem;">${brand.d}</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="#features" class="${bc('light','lg')}">${brand.cta}</a>
+        <a href="#cards" class="btn btn-outline-light btn-lg">${brand.cta2}</a>
+      </div>
+      <div class="mt-5 d-flex gap-4">
+        ${hstats.slice(0,2).map(s=>`<div><div style="font-size:1.75rem;font-weight:800;">${s.v}</div><small style="opacity:.65;">${s.l}</small></div>`).join('')}
+      </div>
+    </div>
+    <div class="col-lg-7 position-relative" style="min-height:50vh;" data-aos="fade-left">
+      <div style="position:absolute;inset:0;background:url('${hi}') center/cover no-repeat;"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to right,${pal.p}55,transparent);"></div>
+    </div>
+  </div>
+</section>`,
+
+    'gradient-banner': `
+<section id="top" style="min-height:88vh;background:linear-gradient(145deg,${pal.p},${pal.dk} 70%);display:flex;align-items:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-20%;right:-8%;width:600px;height:600px;background:${pal.s}25;border-radius:50%;filter:blur(80px);pointer-events:none;"></div>
+  <div style="position:absolute;bottom:-12%;left:-5%;width:420px;height:420px;background:${pal.a}1a;border-radius:50%;filter:blur(65px);pointer-events:none;"></div>
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 text-white" data-aos="fade-up">
+        <div class="glass-pill mb-4">${brand.n}</div>
+        <h1 style="font-family:${font.h};font-size:clamp(2.5rem,4.5vw,3.8rem);font-weight:800;line-height:1.08;margin-bottom:1.25rem;">${brand.tl}</h1>
+        <p style="opacity:.88;font-size:1.08rem;line-height:1.74;margin-bottom:2rem;">${brand.d}</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="#features" class="${bc('light','lg')}">${brand.cta}</a>
+          <a href="#cards" class="btn btn-outline-light btn-lg">${brand.cta2}</a>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center" data-aos="zoom-in" data-aos-delay="100">
+        <img src="${hi}" class="img-fluid rounded-4 lb-img" data-full="${hi}" alt="" style="max-height:440px;width:100%;object-fit:cover;box-shadow:0 30px 80px rgba(0,0,0,.4);cursor:zoom-in;">
+      </div>
+    </div>
+  </div>
+</section>`,
+  };
+
+  const cards = [
+    {title:brand.f1, img:ci[0],              text:ctexts[0], badge:badges[0]},
+    {title:brand.f2, img:ci[1%ci.length],    text:ctexts[1], badge:badges[1]},
+    {title:brand.f3, img:ci[2%ci.length],    text:ctexts[2], badge:badges[2]},
+  ].slice(0,grid.length);
+
+  // ── Determine sensible dark/light defaults ──
+  // A palette is "inherently dark" if its bg is very dark
+  const bgIsDark = pal.bg.startsWith('#0') || pal.bg.startsWith('#1') || pal.bg === '#0d0d1a';
+  const lightBg   = bgIsDark ? '#f4f5f7' : pal.bg;
+  const lightSecAlt = bgIsDark ? '#eef0f4' : pal.lt;
+  const lightSecW   = '#ffffff';
+  const darkBg    = bgIsDark ? pal.bg : pal.dk;
+  const darkSecAlt  = bgIsDark ? pal.lt : '#1a1c26';
+  const darkSecW    = bgIsDark ? '#181825' : '#12131f';
+
+  const css = `
+<style>
+html{scroll-behavior:smooth}
+::selection{ background:${pal.p}35; color:${pal.p}; }
+[id]{ scroll-margin-top:80px; }
+
+/* ══ DESIGN TOKENS — light mode (default) ══ */
+:root{
+  --bg:       ${lightBg};
+  --bg-alt:   ${lightSecAlt};
+  --bg-card:  ${lightSecW};
+  --tx:       ${pal.dk};
+  --tx-muted: #6b7280;
+  --tx-head:  ${pal.dk};
+  --tx-label: #374151;
+  --border-c: ${pal.p}22;
+  --input-bg: #ffffff;
+  --input-tx: #1a1a2e;
+  --input-ph: #9ca3af;
+  --float-card-bg: rgba(255,255,255,.92);
+  --float-card-tx: ${pal.dk};
+  --glass-card-bg: rgba(255,255,255,.55);
+  --glass-card-border: rgba(255,255,255,.35);
+  --nav-dd-bg: #ffffff;
+  --nav-dd-tx: ${pal.dk};
+}
+
+/* ══ DARK OVERRIDES ══ */
+[data-theme="dark"]{
+  --bg:       ${darkBg};
+  --bg-alt:   ${darkSecAlt};
+  --bg-card:  ${darkSecW};
+  --tx:       #e8e8f8;
+  --tx-muted: rgba(220,220,255,0.55);
+  --tx-head:  #f0f0ff;
+  --tx-label: rgba(220,220,255,0.75);
+  --border-c: rgba(255,255,255,0.09);
+  --input-bg: rgba(255,255,255,.07);
+  --input-tx: #e8e8f8;
+  --input-ph: rgba(255,255,255,.35);
+  --float-card-bg: rgba(30,30,50,.85);
+  --float-card-tx: #f0f0ff;
+  --glass-card-bg: rgba(255,255,255,.06);
+  --glass-card-border: rgba(255,255,255,.12);
+  --nav-dd-bg: #1e1e30;
+  --nav-dd-tx: #e8e8f8;
+}
+
+/* ══ BASE ══ */
+body{ background:var(--bg); color:var(--tx); font-family:${font.b},-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; transition:background .35s,color .35s; }
+h1,h2,h3,h4,h5,h6{ font-family:${font.h}; }
+p,li,small,span{ transition:color .3s; }
+
+/* ══ SECTION BACKGROUNDS ══ */
+.sec-page { background:var(--bg)     !important; transition:background .35s; }
+.sec-alt  { background:var(--bg-alt) !important; transition:background .35s; }
+.sec-card { background:var(--bg-card)!important; transition:background .35s; }
+
+/* ══ TEXT HELPERS ══ */
+.tx-head  { color:var(--tx-head)  !important; }
+.tx-body  { color:var(--tx)       !important; }
+.tx-muted { color:var(--tx-muted) !important; }
+.tx-label { color:var(--tx-label) !important; }
+
+/* ══ NAVBAR ══ */
+.dropdown-menu{ background:var(--nav-dd-bg)!important; border-color:var(--border-c)!important; }
+.dropdown-item{ color:var(--nav-dd-tx)!important; }
+.dropdown-item:hover{ background:${pal.p}18!important; color:${pal.p}!important; }
+
+/* ══ BUTTONS ══ */
+.btn{ transition:all .22s cubic-bezier(.34,1.56,.64,1); }
+.btn:active{ transform:scale(.96)!important; }
+.btn-primary{ background:${pal.p}!important; border-color:${pal.p}!important; color:#fff!important; box-shadow:0 2px 12px ${pal.p}40; }
+.btn-primary:hover{ filter:brightness(1.12); transform:translateY(-2px); box-shadow:0 6px 24px ${pal.p}55; }
+.btn-secondary{ background:${pal.s}!important; border-color:${pal.s}!important; color:#fff!important; }
+.btn-outline-primary{ color:${pal.p}!important; border-color:${pal.p}!important; background:transparent!important; }
+.btn-outline-primary:hover{ background:${pal.p}!important; color:#fff!important; }
+.text-primary{ color:${pal.p}!important; }
+
+/* ══ FEATURE BOXES ══ */
+.feature-box{
+  background:var(--bg-card); border:1px solid var(--border-c);
+  border-radius:16px; padding:1.75rem; height:100%;
+  transition:transform .25s, box-shadow .25s, background .35s, border-color .35s;
+}
+.feature-box:hover{ transform:translateY(-5px); box-shadow:0 14px 36px rgba(0,0,0,.1); }
+
+/* ══ CARDS ══ */
+.card{ background:var(--bg-card)!important; border-color:var(--border-c)!important; transition:background .35s, border-color .35s; }
+.c-hover{ transition:transform .25s,box-shadow .25s,background .35s!important; }
+.c-hover:hover{ transform:translateY(-7px)!important; box-shadow:0 20px 45px rgba(0,0,0,.13)!important; }
+.c-glass{
+  background:var(--glass-card-bg)!important;
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--glass-card-border)!important;
+}
+.c-grad{ background:linear-gradient(135deg,${pal.p}14,${pal.s}24)!important; border:1px solid ${pal.p}28!important; }
+.card-img-wrap img{ transition:transform .42s; }
+.card-img-wrap:hover img{ transform:scale(1.07); }
+
+/* ══ TESTIMONIAL CARDS ══ */
+.testi-card{
+  background:var(--bg-card); border-left:4px solid ${pal.p};
+  padding:1.75rem; border-radius:0 14px 14px 0; height:100%;
+  transition:transform .25s, background .35s;
+}
+.testi-card:hover{ transform:translateY(-4px); }
+
+/* ══ FORM ══ */
+.form-panel{
+  background:var(--bg-card);
+  border:1px solid var(--border-c);
+  backdrop-filter:blur(14px);
+  transition:background .35s, border-color .35s;
+}
+.form-control, .form-select{
+  background:var(--input-bg)!important;
+  color:var(--input-tx)!important;
+  border-color:var(--border-c)!important;
+  transition:background .3s, color .3s, border-color .3s;
+}
+.form-control::placeholder{ color:var(--input-ph)!important; }
+.form-control:focus, .form-select:focus{
+  border-color:${pal.p}!important;
+  box-shadow:0 0 0 .2rem ${pal.p}33!important;
+  background:var(--input-bg)!important;
+}
+.form-check-input{ background-color:var(--input-bg)!important; border-color:var(--border-c)!important; }
+.form-check-input:checked{ background-color:${pal.p}!important; border-color:${pal.p}!important; }
+.form-select option{ background:var(--nav-dd-bg); color:var(--nav-dd-tx); }
+
+/* ══ STAT BOXES ══ */
+.stat-bar{ border-left:3px solid var(--c); padding-left:.7rem; }
+
+/* ══ GLASS COMPONENTS ══ */
+.glass-pill{
+  background:rgba(255,255,255,.13); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.22); color:#fff;
+  padding:.32rem 1rem; border-radius:100px; font-size:.82rem; font-weight:600; letter-spacing:.04em; display:inline-block;
+}
+.glass-stat{
+  background:rgba(255,255,255,.1); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.18); padding:.8rem 1.5rem; border-radius:14px; text-align:center;
+}
+.glass-float-card{
+  position:absolute; bottom:-1rem; left:-1.5rem;
+  background:var(--float-card-bg); color:var(--float-card-tx);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(128,128,200,.2); border-radius:14px;
+  padding:.8rem 1.2rem; display:flex; align-items:center; gap:.75rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.14); font-size:.88rem;
+  transition:background .35s, color .35s;
+}
+.glass-float-card strong{ color:var(--tx-head); }
+
+/* ══ HERO BADGE ══ */
+.hero-badge-soft{
+  display:inline-block; background:${pal.p}18; color:${pal.p};
+  padding:.35rem .9rem; border-radius:100px; font-size:.8rem; font-weight:600;
+  margin-bottom:1rem;
+}
+
+/* ══ SECTION HEADINGS ══ */
+.sec-title{ color:var(--tx-head); font-weight:800; margin-bottom:.5rem; }
+.sec-bar{
+  width:60px; height:4px; border-radius:2px; margin:.75rem auto 1.25rem;
+  background:linear-gradient(90deg,${pal.p},${pal.s},${pal.a});
+  background-size:200% 100%;
+  animation:barShimmer 3s ease infinite;
+}
+@keyframes barShimmer{ 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+.sec-bar.left{ margin-left:0; margin-right:auto; }
+.sec-sub{ color:var(--tx-muted); }
+
+/* ══ LIGHTBOX ══ */
+#lb{ position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:9999; display:none; align-items:center; justify-content:center; cursor:zoom-out; }
+#lb.on{ display:flex; animation:lbin .22s ease; }
+@keyframes lbin{ from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+
+/* ══ SCROLL-TO-TOP ══ */
+#stt{
+  position:fixed; bottom:1.5rem; right:1.5rem; width:42px; height:42px; border-radius:50%;
+  background:${pal.p}; color:#fff; border:none; font-size:1rem; cursor:pointer;
+  opacity:0; transition:opacity .3s, transform .3s; transform:translateY(8px);
+  z-index:990; box-shadow:0 4px 18px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center;
+}
+
+/* ══ DARK MODE TOGGLE ══ */
+#dm-toggle{
+  position:fixed; bottom:4.5rem; right:1.5rem; width:42px; height:42px; border-radius:50%;
+  background:var(--bg-card); color:var(--tx); border:1px solid ${pal.p}50;
+  font-size:1rem; cursor:pointer; z-index:990; box-shadow:0 4px 18px rgba(0,0,0,.2);
+  display:flex; align-items:center; justify-content:center;
+  transition:all .25s cubic-bezier(.34,1.56,.64,1), background .35s, color .35s;
+}
+#dm-toggle:hover{ transform:scale(1.12); border-color:${pal.p}; }
+
+/* ══ AOS ══ */
+[data-aos]{ transition-timing-function:cubic-bezier(.22,1,.36,1)!important; }
+[data-aos="fade-up"]         { transform:translateY(40px)!important;  opacity:0; }
+[data-aos="fade-up"].aos-animate    { transform:translateY(0)!important;   opacity:1; }
+[data-aos="fade-right"]      { transform:translateX(-40px)!important; opacity:0; }
+[data-aos="fade-right"].aos-animate { transform:translateX(0)!important;   opacity:1; }
+[data-aos="fade-left"]       { transform:translateX(40px)!important;  opacity:0; }
+[data-aos="fade-left"].aos-animate  { transform:translateX(0)!important;   opacity:1; }
+[data-aos="zoom-in"]         { transform:scale(.88)!important; opacity:0; }
+[data-aos="zoom-in"].aos-animate    { transform:scale(1)!important;   opacity:1; }
+
+/* ══ LOGO BAR ══ */
+.logo-bar{ padding:2.5rem 0; border-bottom:1px solid var(--border-c); }
+.logo-item{
+  font-size:1.05rem; font-weight:700; letter-spacing:-.01em;
+  opacity:.28; transition:opacity .3s;
+  color:var(--tx-head);
+}
+.logo-item:hover{ opacity:.55; }
+
+/* ══ PRICING ══ */
+.pricing-card{
+  background:var(--bg-card); border:1px solid var(--border-c);
+  border-radius:18px; padding:2.25rem; height:100%;
+  transition:transform .25s, box-shadow .25s, background .35s, border-color .35s;
+  position:relative;
+}
+.pricing-card:hover{ transform:translateY(-5px); box-shadow:0 16px 40px rgba(0,0,0,.1); }
+.pricing-card.popular{
+  border-color:${pal.p}; box-shadow:0 0 0 1px ${pal.p}, 0 12px 40px ${pal.p}22;
+}
+.pricing-card .price{ font-size:2.8rem; font-weight:800; color:var(--tx-head); line-height:1; }
+.pricing-card .period{ font-size:.85rem; color:var(--tx-muted); font-weight:400; }
+.pricing-check{ color:${pal.p}; margin-right:.5rem; }
+
+/* ══ FAQ ══ */
+.faq-accordion .accordion-item{
+  background:var(--bg-card)!important; border:1px solid var(--border-c)!important;
+  border-radius:12px!important; margin-bottom:.75rem; overflow:hidden;
+  transition:background .35s, border-color .35s;
+}
+.faq-accordion .accordion-button{
+  background:transparent!important; color:var(--tx-head)!important;
+  font-weight:600; font-size:.95rem; box-shadow:none!important;
+  padding:1.15rem 1.5rem;
+}
+.faq-accordion .accordion-button::after{ filter:none; }
+.faq-accordion .accordion-button:not(.collapsed){ color:${pal.p}!important; }
+.faq-accordion .accordion-body{
+  color:var(--tx-muted)!important; font-size:.9rem; line-height:1.7;
+  padding:0 1.5rem 1.25rem;
+}
+[data-theme="dark"] .faq-accordion .accordion-button::after{ filter:invert(1) grayscale(1) brightness(2); }
+
+/* ══ ALT-ROW FEATURES ══ */
+.feature-alt-row{ padding:2.5rem 0; }
+.feature-alt-img{
+  border-radius:16px; overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.08);
+}
+.feature-alt-img img{ width:100%; height:320px; object-fit:cover; display:block; transition:transform .45s; }
+.feature-alt-img:hover img{ transform:scale(1.04); }
+
+/* ══ FOUR-COL FEATURES ══ */
+.feature-mini{
+  text-align:center; padding:1.5rem 1rem;
+  background:var(--bg-card); border:1px solid var(--border-c);
+  border-radius:14px; height:100%;
+  transition:transform .25s, background .35s, border-color .35s;
+}
+.feature-mini:hover{ transform:translateY(-4px); }
+.feature-mini-ico{
+  width:44px; height:44px; border-radius:50%;
+  background:${pal.p}18; color:${pal.p};
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:1.15rem; margin-bottom:.8rem;
+}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:768px){
+  .glass-float-card{ display:none!important; }
+  h1{ font-size:2rem!important; }
+  h2{ font-size:1.6rem!important; }
+  .pricing-card{ padding:1.5rem; }
+}
+
+/* ══ NOISE TEXTURE ══ */
+body::after{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9998;
+  opacity:.018;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat; background-size:256px 256px;
+}
+
+/* ══ BUTTON REFINEMENTS ══ */
+.btn-lg{ padding:.75rem 2rem; font-size:.95rem; }
+.btn-sm{ padding:.4rem 1.2rem; font-size:.82rem; }
+
+/* ══ GRADIENT TEXT ══ */
+.gradient-text{
+  background:linear-gradient(135deg,${pal.p},${pal.s});
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* ══ GRADIENT PRICING BORDER ══ */
+.pricing-card.popular{
+  border:2px solid transparent!important;
+  background-image:linear-gradient(var(--bg-card),var(--bg-card)),linear-gradient(135deg,${pal.p},${pal.s});
+  background-origin:border-box; background-clip:padding-box,border-box;
+  box-shadow:0 20px 50px ${pal.p}25!important;
+}
+
+/* ══ FEATURE ICON HOVER ══ */
+.feat-ico{ transition:background .25s, color .25s; }
+.feature-box:hover .feat-ico{ background:${pal.p}!important; color:#fff!important; }
+.feature-mini:hover .feature-mini-ico{ background:${pal.p}!important; color:#fff!important; }
+.feature-mini-ico{ transition:background .25s, color .25s; }
+
+/* ══ STATS SECTION ══ */
+.stats-strip{
+  padding:3.5rem 0; position:relative; overflow:hidden;
+}
+.stats-strip::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,${pal.p},${pal.dk} 70%);
+  opacity:.97;
+}
+.stat-item{ text-align:center; position:relative; z-index:1; }
+.stat-num{ font-size:2.5rem; font-weight:800; color:#fff; line-height:1; margin-bottom:.25rem; }
+.stat-label{ font-size:.82rem; color:rgba(255,255,255,.6); font-weight:500; }
+
+/* ══ CTA BANNER ══ */
+.cta-banner{
+  padding:5rem 0; position:relative; overflow:hidden;
+}
+.cta-banner::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(145deg,${pal.p},${pal.s} 120%);
+}
+.cta-blob{
+  position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; opacity:.3;
+}
+
+/* ══ TESTIMONIAL VARIANTS ══ */
+.testi-featured{
+  background:var(--bg-card); border:1px solid var(--border-c);
+  border-radius:20px; padding:2.5rem; position:relative; overflow:hidden;
+  transition:background .35s, border-color .35s;
+}
+.testi-featured::before{
+  content:'\\201C'; position:absolute; top:-.15rem; left:1.2rem;
+  font-size:7rem; font-family:Georgia,serif; color:${pal.p}15; line-height:1; pointer-events:none;
+}
+.testi-sm{
+  background:var(--bg-card); border:1px solid var(--border-c);
+  border-radius:14px; padding:1.5rem; height:100%;
+  transition:transform .25s, background .35s, border-color .35s;
+}
+.testi-sm:hover{ transform:translateY(-3px); }
+
+/* ══ SCROLLING LOGOS ══ */
+.logo-track{
+  display:flex; gap:3rem; animation:marquee 28s linear infinite; white-space:nowrap;
+}
+.logo-track-wrap{
+  overflow:hidden; mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+@keyframes marquee{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ══ REDUCED MOTION ══ */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{ animation-duration:.01ms!important; transition-duration:.01ms!important; }
+  [data-aos]{ opacity:1!important; transform:none!important; }
+}
+</style>`;
+
+  // Feature layout variants
+  const featureNames = [brand.f1, brand.f2, brand.f3];
+  const featureLayouts = {
+    'three-col': `
+<section id="features" class="sec-alt" style="padding:5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title" style="color:${pal.p};">${fhead}</h2>
+        <div class="sec-bar mx-auto"></div>
+        <p class="sec-sub">${secSub}</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      ${[0,1,2].map(i=>`
+      <div class="col-md-4" data-aos="fade-up" data-aos-duration="700" data-aos-delay="${i*100}" data-aos-offset="80">
+        <div class="feature-box">
+          <div class="feat-ico" style="width:50px;height:50px;border-radius:12px;background:${pal.p}1c;color:${pal.p};display:flex;align-items:center;justify-content:center;font-size:1.35rem;margin-bottom:1.1rem;"><i class="bi ${ico2[i]}"></i></div>
+          <h5 class="tx-head" style="font-weight:700;margin-bottom:.5rem;">${featureNames[i]}</h5>
+          <p class="tx-muted" style="font-size:.9rem;margin:0;line-height:1.65;max-width:340px;">${fdescs[i]}</p>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`,
+    'alt-rows': `
+<section id="features" class="sec-alt" style="padding:5.5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title" style="color:${pal.p};">${fhead}</h2>
+        <div class="sec-bar mx-auto"></div>
+        <p class="sec-sub">${secSub}</p>
+      </div>
+    </div>
+    ${[0,1,2].map(i=>`
+    <div class="row align-items-center g-5 feature-alt-row" data-aos="fade-up" data-aos-duration="700" data-aos-delay="${i*80}" data-aos-offset="80">
+      <div class="col-lg-6 ${i%2===1?'order-lg-2':''}">
+        <div class="feature-alt-img">
+          <img src="${ci[i%ci.length]}" alt="${featureNames[i]}">
+        </div>
+      </div>
+      <div class="col-lg-6 ${i%2===1?'order-lg-1':''}">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;">
+          <div style="width:40px;height:40px;border-radius:10px;background:${`${[pal.p,pal.s,pal.a][i]}1c`};color:${[pal.p,pal.s,pal.a][i]};display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="bi ${ico2[i]}"></i></div>
+          <span class="tx-muted" style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">Feature ${i+1}</span>
+        </div>
+        <h3 class="tx-head" style="font-weight:800;margin-bottom:.75rem;">${featureNames[i]}</h3>
+        <p class="tx-muted" style="font-size:.95rem;line-height:1.72;max-width:480px;">${fdescs[i]}</p>
+        <a href="#" class="${bc('outline-primary','sm')} mt-2">Learn more <i class="bi bi-arrow-right ms-1"></i></a>
+      </div>
+    </div>`).join('')}
+  </div>
+</section>`,
+    'four-col': `
+<section id="features" class="sec-alt" style="padding:5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title" style="color:${pal.p};">${fhead}</h2>
+        <div class="sec-bar mx-auto"></div>
+        <p class="sec-sub">${secSub}</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      ${[0,1,2,3].map(i=>`
+      <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-duration="600" data-aos-delay="${i*80}" data-aos-offset="80">
+        <div class="feature-mini">
+          <div class="feature-mini-ico"><i class="bi ${ico2[i]}"></i></div>
+          <h6 class="tx-head" style="font-weight:700;margin-bottom:.4rem;">${i<3?featureNames[i]:('24/7 Support')}</h6>
+          <p class="tx-muted" style="font-size:.82rem;margin:0;line-height:1.6;">${i<3?fdescs[i]:'Round-the-clock expert support whenever you need it.'}</p>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`,
+  };
+  const featuresHTML = featureLayouts[flayout] || featureLayouts['three-col'];
+
+  const cardsHTML = `
+<section id="cards" class="sec-page" style="padding:5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title">${chead}</h2>
+        <div class="sec-bar mx-auto"></div>
+        <p class="sec-sub">${solSub}</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      ${cards.map((c,i)=>`
+      <div class="${grid[i]}" data-aos="fade-up" data-aos-duration="700" data-aos-delay="${i*100}" data-aos-offset="80">
+        <div class="${cc()}">
+          <div class="card-img-wrap" style="overflow:hidden;position:relative;">
+            <img src="${c.img}" class="card-img-top lb-img" data-full="${c.img}" alt="${c.title}" style="height:215px;object-fit:cover;cursor:zoom-in;">
+            <span class="badge position-absolute top-0 end-0 m-2 rounded-pill" style="background:${[pal.p,pal.s,pal.a][i%3]};font-size:.72rem;">${c.badge}</span>
+          </div>
+          <div class="card-body p-4">
+            <h5 class="card-title fw-bold tx-head">${c.title}</h5>
+            <p class="card-text tx-muted" style="font-size:.88rem;">${c.text}</p>
+          </div>
+          <div class="card-footer bg-transparent border-0 px-4 pb-4">
+            <a href="#" class="${bc('primary','sm')} w-100">Learn More <i class="bi bi-arrow-right ms-1"></i></a>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`;
+
+  // Testimonial layout variants
+  const testiLayouts = {
+    'three-col': `
+<section class="sec-alt" style="padding:5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-5 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title" style="color:${pal.p};">${thead}</h2>
+        <div class="sec-bar mx-auto" style="margin-bottom:0;"></div>
+      </div>
+    </div>
+    <div class="row g-4">
+      ${ti.map((t,i)=>`
+      <div class="col-md-4" data-aos="fade-up" data-aos-duration="700" data-aos-delay="${i*100}" data-aos-offset="80">
+        <div class="testi-card">
+          <div style="color:${[pal.s,pal.p,pal.a][i]};font-size:1.2rem;margin-bottom:.75rem;">★★★★★</div>
+          <p class="tx-muted fst-italic" style="margin-bottom:1.25rem;font-size:.94rem;line-height:1.65;">"${t.q}"</p>
+          <div class="d-flex align-items-center gap-3">
+            <img src="${av[i%av.length]}" alt="${t.nm}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid ${pal.p}45;">
+            <div>
+              <div class="tx-head" style="font-weight:700;font-size:.87rem;">${t.nm}</div>
+              <div class="tx-muted" style="font-size:.75rem;">${t.ro}</div>
+            </div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`,
+    'featured': `
+<section class="sec-alt" style="padding:5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-5 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title" style="color:${pal.p};">${thead}</h2>
+        <div class="sec-bar mx-auto" style="margin-bottom:0;"></div>
+      </div>
+    </div>
+    <div class="row g-4" data-aos="fade-up" data-aos-duration="700" data-aos-offset="80">
+      <div class="col-lg-8">
+        <div class="testi-featured">
+          <div style="color:${pal.s};font-size:1.3rem;margin-bottom:1rem;">★★★★★</div>
+          <p class="tx-body" style="font-size:1.25rem;line-height:1.7;font-style:italic;margin-bottom:1.5rem;">"${ti[0].q}"</p>
+          <div class="d-flex align-items-center gap-3">
+            <img src="${av[0]}" alt="${ti[0].nm}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid ${pal.p};">
+            <div>
+              <div class="tx-head" style="font-weight:700;font-size:1rem;">${ti[0].nm}</div>
+              <div class="tx-muted" style="font-size:.82rem;">${ti[0].ro}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 d-flex flex-column gap-4">
+        ${ti.slice(1).map((t,i)=>`
+        <div class="testi-sm" data-aos="fade-left" data-aos-delay="${(i+1)*100}">
+          <div style="color:${pal.a};font-size:.9rem;margin-bottom:.5rem;">★★★★★</div>
+          <p class="tx-muted fst-italic" style="font-size:.88rem;line-height:1.6;margin-bottom:.8rem;">"${t.q}"</p>
+          <div class="d-flex align-items-center gap-2">
+            <img src="${av[(i+1)%av.length]}" alt="${t.nm}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+            <div>
+              <div class="tx-head" style="font-weight:600;font-size:.8rem;">${t.nm}</div>
+              <div class="tx-muted" style="font-size:.7rem;">${t.ro}</div>
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+</section>`,
+    'single-large': `
+<section class="sec-alt" style="padding:5.5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="80">
+      <div class="col-lg-8 text-center">
+        <div style="color:${pal.s};font-size:1.5rem;margin-bottom:1.25rem;">★★★★★</div>
+        <p class="tx-body" style="font-size:clamp(1.2rem,2.5vw,1.6rem);line-height:1.65;font-style:italic;font-family:${font.h};margin-bottom:2rem;">"${ti[0].q}"</p>
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <img src="${av[0]}" alt="${ti[0].nm}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:3px solid ${pal.p};">
+          <div class="text-start">
+            <div class="tx-head" style="font-weight:700;font-size:.95rem;">${ti[0].nm}</div>
+            <div class="tx-muted" style="font-size:.8rem;">${ti[0].ro}</div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-center gap-5 mt-4 pt-3" style="border-top:1px solid var(--border-c);">
+          ${hstats.map(s=>`<div><div class="fw-bold fs-5" style="color:${pal.p};">${s.v}</div><small class="tx-muted">${s.l}</small></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>`,
+  };
+  const testiHTML = testiLayouts[tlayout] || testiLayouts['three-col'];
+
+  const formHTML = `
+<section style="background:${pal.p};padding:5rem 0;">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5" data-aos="fade-right" data-aos-duration="750" data-aos-offset="80">
+        <h2 style="font-weight:800;font-size:2.2rem;margin-bottom:1rem;color:#fff;">${brand.ft}</h2>
+        <div style="width:48px;height:4px;background:rgba(255,255,255,.35);border-radius:2px;margin-bottom:1.5rem;"></div>
+        <p style="opacity:.86;line-height:1.76;margin-bottom:1.5rem;color:#fff;">${brand.d}</p>
+        <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:.6rem;color:#fff;">
+          ${[brand.f1,brand.f2,brand.f3].map(f=>`<li><i class="bi bi-check-circle-fill me-2" style="color:rgba(255,255,255,.7);"></i>${f}</li>`).join('')}
+        </ul>
+      </div>
+      <div class="col-lg-6 offset-lg-1" data-aos="fade-left" data-aos-duration="750" data-aos-delay="80" data-aos-offset="80">
+        <div class="form-panel p-4 p-lg-5 rounded-4 shadow-lg">
+          <h4 class="tx-head" style="font-weight:700;margin-bottom:1.5rem;">${brand.ft}</h4>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold tx-label">First Name</label>
+              <input type="text" class="form-control" placeholder="Jane">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold tx-label">Last Name</label>
+              <input type="text" class="form-control" placeholder="Smith">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-semibold tx-label">Work Email</label>
+              <input type="email" class="form-control" placeholder="jane@company.com">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-semibold tx-label">Company Size</label>
+              <select class="form-select">
+                <option>1–10 employees</option>
+                <option>11–50 employees</option>
+                <option>51–200 employees</option>
+                <option>200+ employees</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-semibold tx-label">Message</label>
+              <textarea class="form-control" rows="3" placeholder="Tell us about your use case..."></textarea>
+            </div>
+            <div class="col-12">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="c1">
+                <label class="form-check-label small tx-muted" for="c1">I agree to receive updates from ${brand.n}</label>
+              </div>
+              <button type="button" class="${bc('primary')} w-100 py-2">${brand.cta} <i class="bi bi-arrow-right ms-1"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>`;
+
+  // Logo bar with scrolling marquee
+  const logoDouble = [...logoNames,...logoNames]; // duplicate for seamless loop
+  const logosHTML = `
+<section class="logo-bar sec-page">
+  <div class="container">
+    <p class="text-center tx-muted" style="font-size:.78rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.25rem;">${logoHead}</p>
+  </div>
+  <div class="logo-track-wrap">
+    <div class="logo-track">
+      ${logoDouble.map(n=>`<span class="logo-item" style="font-family:${font.h};font-size:1.15rem;">${n}</span>`).join('')}
+    </div>
+  </div>
+</section>`;
+
+  // Stats counter section
+  const statsHTML = `
+<section class="stats-strip" data-aos="fade-up" data-aos-duration="700" data-aos-offset="80">
+  <div style="position:absolute;top:-30%;right:-10%;width:400px;height:400px;background:${pal.s}30;border-radius:50%;filter:blur(80px);pointer-events:none;"></div>
+  <div class="container position-relative" style="z-index:1;">
+    <div class="row g-4 justify-content-center">
+      ${hstats.map((s,i)=>`
+      <div class="col-6 col-md-4 col-lg" data-aos="zoom-in" data-aos-delay="${i*100}">
+        <div class="stat-item">
+          <div class="stat-num count-up" data-target="${s.v}">${s.v}</div>
+          <div class="stat-label">${s.l}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`;
+
+  // CTA banner section
+  const ctaBannerHTML = `
+<section class="cta-banner" data-aos="fade-up" data-aos-duration="700" data-aos-offset="80">
+  <div class="cta-blob" style="top:-20%;left:-5%;width:300px;height:300px;background:${pal.a};"></div>
+  <div class="cta-blob" style="bottom:-25%;right:-8%;width:400px;height:400px;background:${pal.s};"></div>
+  <div class="container position-relative text-center" style="z-index:1;">
+    <h2 style="font-family:${font.h};font-weight:800;font-size:clamp(1.8rem,4vw,2.8rem);color:#fff;margin-bottom:.75rem;">${ctaHead}</h2>
+    <p style="color:rgba(255,255,255,.8);font-size:1.05rem;max-width:480px;margin:0 auto 2rem;line-height:1.7;">${ctaSub}</p>
+    <div class="d-flex justify-content-center flex-wrap gap-3">
+      <a href="#" class="${bc('light','lg')}">${brand.cta}</a>
+      <a href="#" class="btn btn-outline-light btn-lg">${brand.cta2}</a>
+    </div>
+  </div>
+</section>`;
+
+  // Pricing
+  const pricingHTML = `
+<section id="pricing" class="sec-alt" style="padding:5.5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title" style="color:${pal.p};">${pricingHead}</h2>
+        <div class="sec-bar mx-auto"></div>
+        <p class="sec-sub">${pricingSub}</p>
+      </div>
+    </div>
+    <div class="row g-4 justify-content-center">
+      ${pricingTiers.map((t,i)=>`
+      <div class="col-md-4" data-aos="fade-up" data-aos-duration="700" data-aos-delay="${i*100}" data-aos-offset="80">
+        <div class="pricing-card${t.pop?' popular':''}">
+          ${t.pop?`<span class="badge rounded-pill position-absolute top-0 start-50 translate-middle" style="background:${pal.p};font-size:.72rem;padding:.4rem .9rem;">Most Popular</span>`:''}
+          <h5 class="tx-head" style="font-weight:700;margin-bottom:.5rem;">${t.name}</h5>
+          <div class="mb-3"><span class="price">${t.price}</span><span class="period">${t.period}</span></div>
+          <ul style="list-style:none;padding:0;margin-bottom:1.5rem;">
+            ${t.features.map(f=>`<li class="tx-muted" style="font-size:.88rem;padding:.35rem 0;"><i class="bi bi-check-circle-fill pricing-check"></i>${f}</li>`).join('')}
+          </ul>
+          <a href="#" class="${t.pop?bc('primary'):bc('outline-primary')} w-100">${t.cta}</a>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`;
+
+  // FAQ
+  const faqHTML = `
+<section class="sec-page" style="padding:5rem 0;">
+  <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-duration="700" data-aos-offset="100">
+        <h2 class="sec-title">${faqHead}</h2>
+        <div class="sec-bar mx-auto"></div>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-8" data-aos="fade-up" data-aos-duration="700" data-aos-delay="80" data-aos-offset="80">
+        <div class="accordion faq-accordion" id="faqAcc">
+          ${faqItems.map((item,i)=>`
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button${i>0?' collapsed':''}" type="button" data-bs-toggle="collapse" data-bs-target="#faq${i}">${item.q}</button>
+            </h2>
+            <div id="faq${i}" class="accordion-collapse collapse${i===0?' show':''}" data-bs-parent="#faqAcc">
+              <div class="accordion-body">${item.a}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>`;
+
+  const footer = `
+<footer style="background:${pal.dk};color:rgba(255,255,255,.7);padding:4rem 0 2rem;">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div style="font-weight:800;font-size:1.2rem;color:#fff;font-family:${font.h};margin-bottom:.5rem;">${brand.n}</div>
+        <p style="font-size:.88rem;opacity:.55;line-height:1.7;">${brand.tl}. Built for teams that demand excellence.</p>
+        <div style="display:flex;gap:1rem;margin-top:1rem;">
+          ${['bi-twitter-x','bi-linkedin','bi-github','bi-instagram'].map(i=>`<a href="#" style="color:rgba(255,255,255,.4);font-size:1.2rem;" onmouseenter="this.style.color='rgba(255,255,255,.9)'" onmouseleave="this.style.color='rgba(255,255,255,.4)'"><i class="bi ${i}"></i></a>`).join('')}
+        </div>
+      </div>
+      <div class="col-6 col-lg-2 offset-lg-1">
+        <div style="font-weight:600;font-size:.73rem;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;">Product</div>
+        <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:.45rem;">
+          ${['Features','Pricing','Changelog','Roadmap'].map(l=>`<li><a href="#" style="color:rgba(255,255,255,.5);font-size:.875rem;text-decoration:none;" onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='rgba(255,255,255,.5)'">${l}</a></li>`).join('')}
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div style="font-weight:600;font-size:.73rem;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;">Company</div>
+        <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:.45rem;">
+          ${['About','Blog','Careers','Contact'].map(l=>`<li><a href="#" style="color:rgba(255,255,255,.5);font-size:.875rem;text-decoration:none;" onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='rgba(255,255,255,.5)'">${l}</a></li>`).join('')}
+        </ul>
+      </div>
+      <div class="col-lg-3">
+        <div style="font-weight:600;font-size:.73rem;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;">Stay Updated</div>
+        <div class="input-group mb-2">
+          <input type="email" class="form-control form-control-sm" placeholder="your@email.com" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff;">
+          <button class="btn btn-sm" style="background:${pal.p};color:#fff;border:none;">Go</button>
+        </div>
+        <p style="font-size:.73rem;opacity:.38;">No spam. Unsubscribe anytime.</p>
+      </div>
+    </div>
+    <hr style="border-color:rgba(255,255,255,.08);margin:2rem 0;">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <p style="font-size:.8rem;opacity:.32;margin:0;">© ${new Date().getFullYear()} ${brand.n}. All rights reserved.</p>
+      <div style="display:flex;gap:1.25rem;">
+        ${['Privacy','Terms','Cookies'].map(l=>`<a href="#" style="color:rgba(255,255,255,.38);font-size:.8rem;text-decoration:none;">${l}</a>`).join('')}
+      </div>
+    </div>
+  </div>
+</footer>`;
+
+  const lightbox = `
+<div id="lb" onclick="this.classList.remove('on')">
+  <img id="lb-i" src="" style="max-width:92vw;max-height:90vh;border-radius:8px;box-shadow:0 0 80px rgba(0,0,0,.8);object-fit:contain;">
+  <button onclick="event.stopPropagation();document.getElementById('lb').classList.remove('on')" style="position:absolute;top:1.25rem;right:1.5rem;background:rgba(255,255,255,.13);border:none;color:#fff;font-size:1.4rem;width:42px;height:42px;border-radius:50%;cursor:pointer;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;">✕</button>
+</div>
+<button id="stt" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="bi bi-arrow-up"></i></button>
+<button id="dm-toggle" onclick="toggleTheme()" title="Toggle dark / light mode">
+  <i class="bi bi-moon-stars-fill" id="dm-ico"></i>
+</button>`;
+
+  const endScripts = `
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"><\/script>
+<script>
+AOS.init({duration:800,once:true,offset:80,anchorPlacement:'top-bottom',easing:'ease-out-cubic'});
+
+// ── Lightbox ──
+document.querySelectorAll('.lb-img').forEach(img=>{
+  img.addEventListener('click',()=>{
+    document.getElementById('lb-i').src = img.dataset.full||img.src;
+    document.getElementById('lb').classList.add('on');
+  });
+});
+
+// ── Scroll-to-top ──
+const stt=document.getElementById('stt');
+window.addEventListener('scroll',()=>{
+  const show=window.scrollY>380;
+  stt.style.opacity=show?'1':'0';
+  stt.style.transform=show?'translateY(0)':'translateY(8px)';
+},{passive:true});
+
+// ── Dark / Light Mode Toggle ──
+let currentTheme = '${dark?'dark':'light'}';
+function toggleTheme(){
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  document.getElementById('dm-ico').className = currentTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+}
+// Set correct initial icon (theme already set via html attribute)
+document.getElementById('dm-ico').className = currentTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+
+// ── Scroll progress bar ──
+const sp=document.createElement('div');
+sp.style.cssText='position:fixed;top:0;left:0;height:3px;z-index:9999;background:linear-gradient(90deg,${pal.p},${pal.s});width:0;transition:width .1s;';
+document.body.appendChild(sp);
+window.addEventListener('scroll',()=>{
+  const pct=window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100;
+  sp.style.width=pct+'%';
+},{passive:true});
+<\/script>`;
+
+  // Build middle sections in randomized order with inclusion toggles
+  const middleSections = [];
+  if (showLogos) middleSections.push({id:'logos', html:logosHTML, weight:0});
+  middleSections.push({id:'features', html:featuresHTML, weight:1});
+  if (showStats) middleSections.push({id:'stats', html:statsHTML, weight:1.5});
+  middleSections.push({id:'cards', html:cardsHTML, weight:2});
+  if (showTesti) middleSections.push({id:'testi', html:testiHTML, weight:3});
+  if (showPricing) middleSections.push({id:'pricing', html:pricingHTML, weight:Math.random()<0.5?2.5:3.5});
+  if (showCta) middleSections.push({id:'cta', html:ctaBannerHTML, weight:3.8});
+  if (showFaq) middleSections.push({id:'faq', html:faqHTML, weight:4});
+  // Sort by weight to get a reasonable order
+  middleSections.sort((a,b)=>a.weight-b.weight);
+  const middleHTML = middleSections.map(s=>s.html).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en" data-theme="${dark?'dark':'light'}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${brand.n} — ${brand.tl}</title>
+<link href="https://fonts.googleapis.com/css2?family=${font.gf}&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+${css}
+</head>
+<body>
+${nav}
+${heroes[hl]}
+${middleHTML}
+${formHTML}
+${footer}
+${lightbox}
+${endScripts}
+</body>
+</html>`;
+}
+
+// ── Auto-generate on first visit ──
+window.addEventListener('DOMContentLoaded', () => generate());
+</script>
+</body>
+</html>
