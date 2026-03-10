@@ -149,6 +149,8 @@ const P = [
   {n:'Neon Dusk',    p:'#0d9488',s:'#2dd4bf',a:'#99f6e4',bg:'#f0fdfa',dk:'#042f2e',tx:'#134e4a',lt:'#ccfbf1',d:false},
   {n:'Deep Space',   p:'#6366f1',s:'#8b5cf6',a:'#a78bfa',bg:'#0d0d1a',dk:'#050510',tx:'#e0e7ff',lt:'#1e1b4b',d:true },
   {n:'Nordic',       p:'#1e3a5f',s:'#5b8db8',a:'#a8d5f5',bg:'#f0f6ff',dk:'#0a1628',tx:'#1a2840',lt:'#dbeafe',d:false},
+  {n:'Silver',       p:'#525252',s:'#a3a3a3',a:'#d4d4d4',bg:'#fafafa',dk:'#171717',tx:'#262626',lt:'#e5e5e5',d:false},
+  {n:'Charcoal',     p:'#a3a3a3',s:'#737373',a:'#525252',bg:'#0a0a0a',dk:'#050505',tx:'#e5e5e5',lt:'#1c1c1c',d:true },
 ];
 
 const F = [
@@ -181,6 +183,8 @@ const BR = [
   {n:'MindBridge',       tl:'Knowledge That Sticks',          d:'Adaptive learning technology that personalizes every lesson to the way your brain works. Study smarter, retain more, achieve faster.',  cta:'Try for Free',        cta2:'How It Works',        f1:'Adaptive quizzes',        f2:'Spaced repetition',      f3:'Progress analytics',     ft:'Start Learning',   tp:'education'},
   {n:'Novu Foods',       tl:'Taste the Future',               d:'Sustainable, science-backed nutrition delivered to your door. Every meal is crafted by Michelin-trained chefs and dietitians.',        cta:'Order Now',           cta2:'View Menu',           f1:'Chef-crafted meals',      f2:'Macro tracking',         f3:'Eco packaging',          ft:'Get 20% Off',      tp:'food'},
   {n:'Harvest Kitchen',  tl:'Farm to Fork, Simplified',       d:'Connecting local farmers with conscious eaters. Get seasonal ingredient boxes with recipe cards delivered fresh each week.',           cta:'Get My Box',          cta2:'See This Week',       f1:'Seasonal ingredients',    f2:'Recipe card included',   f3:'Zero food waste',        ft:'Subscribe & Save',tp:'food'},
+  {n:'Mono Studio',      tl:'Less Is More',                   d:'Minimalist design consultancy and digital studio. We strip away the noise to reveal what truly matters — clarity, function, beauty.',      cta:'Start a Project',     cta2:'View Portfolio',      f1:'Brand strategy',          f2:'UI/UX design',           f3:'Design systems',         ft:'Get in Touch',     tp:'mono'},
+  {n:'Greyline',         tl:'Precision in Every Pixel',       d:'Architecture and industrial design firm. We craft spaces and products where form follows function with uncompromising attention to detail.',cta:'See Our Work',        cta2:'Book Consultation',   f1:'Architectural design',    f2:'3D visualization',       f3:'Project management',     ft:'Request a Brief',  tp:'mono'},
 ];
 
 const HI = {
@@ -192,6 +196,7 @@ const HI = {
   travel:   ['https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&q=85','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=85','https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1600&q=85','https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=1600&q=85'],
   education:['https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=1600&q=85','https://images.unsplash.com/photo-1529636798458-92182e662485?w=1600&q=85','https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1600&q=85','https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1600&q=85'],
   food:     ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1600&q=85','https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&q=85','https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=85','https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1600&q=85'],
+  mono:     ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1600&q=85','https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1600&q=85','https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=1600&q=85','https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf?w=1600&q=85'],
 };
 const CI = {
   analytics:['https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&q=80','https://images.unsplash.com/photo-1543286386-713bdd548da4?w=800&q=80','https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80','https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&q=80','https://images.unsplash.com/photo-1666875753105-c63a6f3bdc86?w=800&q=80','https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80'],
@@ -202,6 +207,7 @@ const CI = {
   travel:   ['https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80','https://images.unsplash.com/photo-1502791451862-7bd8c1df43a7?w=800&q=80','https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80','https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800&q=80','https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80'],
   education:['https://images.unsplash.com/photo-1581726707445-75cbe4efc586?w=800&q=80','https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80','https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80','https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80','https://images.unsplash.com/photo-1529636798458-92182e662485?w=800&q=80','https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80'],
   food:     ['https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80','https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80','https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80','https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&q=80','https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80','https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80'],
+  mono:     ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80','https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80','https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&q=80','https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80','https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800&q=80','https://images.unsplash.com/photo-1445510861639-5651173bc5d5?w=800&q=80'],
 };
 const AV = [
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80',
@@ -282,6 +288,7 @@ const BG_VIDEOS = {
   travel:    ['https://assets.mixkit.co/videos/3079/3079-720.mp4','https://assets.mixkit.co/videos/1166/1166-720.mp4','https://assets.mixkit.co/videos/34405/34405-720.mp4'],
   education: ['https://assets.mixkit.co/videos/3971/3971-720.mp4','https://assets.mixkit.co/videos/12749/12749-720.mp4','https://assets.mixkit.co/videos/50330/50330-720.mp4'],
   food:      ['https://assets.mixkit.co/videos/21786/21786-720.mp4','https://assets.mixkit.co/videos/43603/43603-720.mp4','https://assets.mixkit.co/videos/24041/24041-720.mp4'],
+  mono:      ['https://assets.mixkit.co/videos/4800/4800-720.mp4','https://assets.mixkit.co/videos/4869/4869-720.mp4','https://assets.mixkit.co/videos/47239/47239-720.mp4'],
 };
 
 const HERO_STATS = [
@@ -746,6 +753,7 @@ html{scroll-behavior:smooth;overflow-x:clip}
 /* ══ BASE ══ */
 body{ background:var(--bg); color:var(--tx); font-family:${font.b},-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; transition:background .35s,color .35s; }
 h1,h2,h3,h4,h5,h6{ font-family:${font.h}; }
+${(pal.n==='Silver'||pal.n==='Charcoal')?'img:not(.no-grayscale), video { filter:grayscale(1); }':''}
 p,li,small,span{ transition:color .3s; }
 
 /* ══ SECTION BACKGROUNDS ══ */
