@@ -1,6 +1,6 @@
 # Bootstrap Design Generator
 
-A single-file Bootstrap 5 website template generator that produces complete, randomized SaaS landing pages with **36 million+ unique visual combinations**. Every click generates a fully functional, responsive, dark-mode-ready website you can download as a standalone HTML file. 
+A single-file Bootstrap 5 website template generator that produces complete, randomized SaaS landing pages with **108 million+ unique visual combinations**. Every click generates a fully functional, responsive, dark-mode-ready website you can download as a standalone HTML file -- including video background heroes, privacy/terms modals, cookie consent, and scroll animations.
 
 Download or use on https://pietercooreman.github.io/Bootstrap-Template-Generator/
 
@@ -27,7 +27,7 @@ No build tools, no dependencies, no server required.
 | Color Palettes | 10 | 8 light + 2 dark themes, each with 8 tokens (primary, secondary, accent, background, dark, text, light, dark flag) |
 | Font Pairings | 10 | All Google Fonts -- 3 serif/sans combos, 7 sans/sans combos. Includes variable/optical-sizing fonts (Fraunces, Bricolage Grotesque) |
 | Brand Identities | 16 | Complete SaaS personas across 8 industries, each with name, tagline, description, 3 feature names, CTAs |
-| Hero Layouts | 5 | Full-background glass, split, centered, magazine, gradient banner |
+| Hero Layouts | 6 | Full-background glass, split, centered, magazine, gradient banner, **video background** |
 | Nav Styles | 5 | Dark, colored, glass-dark, glass-light, minimal-light |
 | Button Variants | 5 | Rounded-pill, square, rounded, outline-first, mixed |
 | Card Styles | 5 | Shadow-hover, glass-card, flat-border, gradient-tint, image-top |
@@ -43,7 +43,7 @@ Every generated template includes a selection of these sections, assembled in a 
 |---------|:-:|:-:|---|
 | Announcement Bar | | 50% | Gradient banner with icon, text, link to detail modal, dismiss button |
 | Navigation | x | | Sticky responsive navbar with dropdown, scrollspy, conditional pricing link |
-| Hero | x | | One of 5 layout variants with stats, badges, floating cards |
+| Hero | x | | One of 6 layout variants with stats, badges, floating cards, or looping video background |
 | Logo Bar | | 75% | Scrolling marquee of company names with edge-fade masks |
 | Features | x | | One of 3 layout variants with icon boxes and descriptions |
 | Stats Strip | | 70% | Full-width gradient band with large stat numbers and decorative blur blobs |
@@ -73,7 +73,7 @@ The generated templates use 13 distinct Bootstrap component types:
 - **Grid** -- Full responsive grid with gutters, offsets, order classes
 - **Utilities** -- Flex, spacing, text, position, shadow, border, display, sizing
 
-### Interactive Features (15)
+### Interactive Features (16)
 
 | Feature | Description |
 |---------|-------------|
@@ -92,8 +92,9 @@ The generated templates use 13 distinct Bootstrap component types:
 | Feature Icon Hover | Icon background fills to primary color on hover |
 | Image Hover Zoom | Card and hero images scale subtly on hover |
 | AOS Scroll Animations | Fade-up, fade-left, fade-right, zoom-in with custom cubic-bezier easing |
+| Video Background Hero | 20% of generations feature a full-viewport looping video background with dark overlay |
 
-### CSS Techniques (17)
+### CSS Techniques (18)
 
 | Technique | Details |
 |-----------|---------|
@@ -114,6 +115,7 @@ The generated templates use 13 distinct Bootstrap component types:
 | Scroll Margin | `scroll-margin-top: 80px` prevents anchors from hiding behind sticky nav |
 | Button Glow | Primary buttons have palette-colored `box-shadow` that intensifies on hover |
 | Transition Orchestration | All theme-sensitive properties transition on dark/light mode switch (background, color, border-color) |
+| Video Cover Background | HTML5 `<video>` with `object-fit: cover` fills hero viewport; fallback to static background image |
 
 ### Responsive Design
 
@@ -125,6 +127,7 @@ The generated templates use 13 distinct Bootstrap component types:
 - **Flex wrap** on button groups and CTA sections for mobile stacking
 - **Cookie toast** width adapts: `max-width: 540px; width: calc(100% - 2rem)`
 - **Viewport meta tag** on all generated pages
+- **Overflow protection** -- `overflow-x: clip` on `<html>` and `overflow: hidden` on hero sections prevent horizontal scrollbar from decorative elements
 
 ### Accessibility
 
@@ -151,16 +154,17 @@ The generated templates use 13 distinct Bootstrap component types:
 
 ## Content Data
 
-### Images
+### Images & Video
 
 | Type | Per Industry | Industries | Total |
 |------|:-:|:-:|:-:|
 | Hero images | 4 | 8 | 32 |
 | Card images | 6 | 8 | 48 |
 | Avatar portraits | -- | -- | 12 |
-| **Total** | | | **92** |
+| Background videos (MP4) | 3 | 8 | 24 |
+| **Total** | | | **116** |
 
-All images sourced from Unsplash with verified working URLs.
+All images sourced from Unsplash. Background videos sourced from Mixkit (free stock, direct CDN MP4s). All URLs verified working.
 
 ### Text Content
 
@@ -198,12 +202,12 @@ All images sourced from Unsplash with verified working URLs.
 The generator randomly selects from independent pools for each design dimension:
 
 ```
-10 palettes x 10 fonts x 16 brands x 5 heroes x 5 nav styles
+10 palettes x 10 fonts x 16 brands x 6 heroes x 5 nav styles
 x 5 button variants x 5 card styles x 4 grids x 3 feature layouts
-x 3 testimonial layouts = 36,000,000 base combinations
+x 3 testimonial layouts = 108,000,000 base combinations
 ```
 
-With conditional sections (7 independent toggles), data pool selections, and section ordering randomization, the effective number of distinct templates is orders of magnitude higher.
+With conditional sections (8 independent toggles including announcement bar), data pool selections, video background randomization (20% chance), and section ordering randomization, the effective number of distinct templates is orders of magnitude higher.
 
 ---
 
@@ -215,6 +219,8 @@ With conditional sections (7 independent toggles), data pool selections, and sec
 | Icons | Bootstrap Icons 1.11.3 |
 | Fonts | Google Fonts (10 families, dynamically loaded) |
 | Animations | AOS 2.3.4 (Animate On Scroll) |
+| Images | Unsplash (92 verified photos) |
+| Video | Mixkit (24 free stock MP4s via CDN, no API key required) |
 | Generator | Vanilla JavaScript (single file, no build step) |
 | Output | Self-contained HTML files (no external dependencies beyond CDN links) |
 
@@ -240,9 +246,10 @@ Generated templates work in all modern browsers that support:
 - `backdrop-filter` (glassmorphism)
 - CSS `clamp()`
 - `scroll-behavior: smooth`
+- HTML5 `<video>` with `autoplay` + `muted` (for video hero backgrounds)
 - Bootstrap 5.3.3 requirements
 
-Graceful degradation for `prefers-reduced-motion` and browsers without `backdrop-filter` support.
+Graceful degradation for `prefers-reduced-motion` and browsers without `backdrop-filter` support. Video heroes fall back to a static background image if video loading fails. Works from `file://` origins (local HTML files) without restrictions.
 
 ---
 
