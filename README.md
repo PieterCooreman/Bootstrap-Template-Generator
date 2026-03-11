@@ -1,6 +1,6 @@
 # Bootstrap Design Generator
 
-A single-file Bootstrap 5 website template generator that produces complete, randomized SaaS landing pages with **129 million+ unique visual combinations**. Every click generates a fully functional, responsive, dark-mode-ready website you can download as a standalone HTML file -- including video background heroes, privacy/terms modals, cookie consent, and scroll animations.
+A single-file Bootstrap 5 website template generator that produces complete, randomized SaaS landing pages with **201 million+ unique visual combinations**. Every click generates a fully functional, responsive, dark-mode-ready website you can download as a standalone HTML file -- including video background heroes, privacy/terms modals, cookie consent, and scroll animations.
 
 Download or use on https://pietercooreman.github.io/Bootstrap-Design-Generator/
 
@@ -24,9 +24,9 @@ No build tools, no dependencies, no server required.
 
 | Category | Count | Details |
 |----------|-------|---------|
-| Color Palettes | 12 | 8 light + 2 dark color themes + 2 grayscale themes (1 light, 1 dark), each with 8 tokens (primary, secondary, accent, background, dark, text, light, dark flag) |
+| Color Palettes | 12 | 8 light + 2 dark color themes + 2 grayscale (1 light, 1 dark), each with 8 design tokens |
 | Font Pairings | 10 | All Google Fonts -- 3 serif/sans combos, 7 sans/sans combos. Includes variable/optical-sizing fonts (Fraunces, Bricolage Grotesque) |
-| Brand Identities | 18 | Complete SaaS personas across 9 industries (including monochrome design/architecture), each with name, tagline, description, 3 feature names, CTAs |
+| Brand Identities | 28 | Complete SaaS personas across 9 industries (including monochrome design/architecture), each with name, tagline, description, 3 feature names, CTAs |
 | Hero Layouts | 6 | Full-background glass, split, centered, magazine, gradient banner, **video background** |
 | Nav Styles | 5 | Dark, colored, glass-dark, glass-light, minimal-light |
 | Button Variants | 5 | Rounded-pill, square, rounded, outline-first, mixed |
@@ -158,13 +158,13 @@ The generated templates use 13 distinct Bootstrap component types:
 
 | Type | Per Industry | Industries | Total |
 |------|:-:|:-:|:-:|
-| Hero images | 4 | 9 | 36 |
-| Card images | 6 | 9 | 54 |
+| Hero images | 5 | 9 | 45 |
+| Card images | 7-8 | 9 | 65 |
 | Avatar portraits | -- | -- | 12 |
 | Background videos (MP4) | 3 | 9 | 27 |
-| **Total** | | | **129** |
+| **Total unique media** | | | **149** |
 
-All images sourced from Unsplash. Background videos sourced from Mixkit (free stock, direct CDN MP4s). All URLs verified working. Grayscale palettes automatically apply `filter: grayscale(1)` to all images and videos for a monochrome aesthetic.
+All images sourced from Unsplash (97 unique photos). Background videos sourced from Mixkit (21 unique free stock MP4s via CDN). All URLs verified returning HTTP 200. Grayscale palettes automatically apply `filter: grayscale(1)` to all images and videos for a monochrome aesthetic.
 
 ### Text Content
 
@@ -202,9 +202,9 @@ All images sourced from Unsplash. Background videos sourced from Mixkit (free st
 The generator randomly selects from independent pools for each design dimension:
 
 ```
-12 palettes x 10 fonts x 18 brands x 6 heroes x 5 nav styles
+12 palettes x 10 fonts x 28 brands x 6 heroes x 5 nav styles
 x 5 button variants x 5 card styles x 4 grids x 3 feature layouts
-x 3 testimonial layouts = 129,600,000 base combinations
+x 3 testimonial layouts = 201,600,000 base combinations
 ```
 
 With conditional sections (8 independent toggles including announcement bar), data pool selections, video background randomization (20% chance), and section ordering randomization, the effective number of distinct templates is orders of magnitude higher.
@@ -219,8 +219,8 @@ With conditional sections (8 independent toggles including announcement bar), da
 | Icons | Bootstrap Icons 1.11.3 |
 | Fonts | Google Fonts (10 families, dynamically loaded) |
 | Animations | AOS 2.3.4 (Animate On Scroll) |
-| Images | Unsplash (102 verified photos) |
-| Video | Mixkit (27 free stock MP4s via CDN, no API key required) |
+| Images | Unsplash (97 unique verified photos + 12 avatars) |
+| Video | Mixkit (21 unique free stock MP4s via CDN, no API key required) |
 | Generator | Vanilla JavaScript (single file, no build step) |
 | Output | Self-contained HTML files (no external dependencies beyond CDN links) |
 
